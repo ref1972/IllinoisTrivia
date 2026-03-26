@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { insertEvent } from '@/lib/db';
+import { insertEvent, isCaptchaEnabled } from '@/lib/db';
 import { verifyRecaptcha } from '@/lib/recaptcha';
+import { sendSubmissionEmails } from '@/lib/email';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
@@ -12,12 +13,14 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
 
-    // Verify reCAPTCHA
-    const recaptchaToken = formData.get('recaptchaToken') as string;
-    if (recaptchaToken) {
-      const valid = await verifyRecaptcha(recaptchaToken);
-      if (!valid) {
-        return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 400 });
+    // Verify reCAPTCHA (if enabled)
+    if (isCaptchaEnabled()) {
+      const recaptchaToken = formData.get('recaptchaToken') as string;
+      if (recaptchaToken) {
+        const valid = await verifyRecaptcha(recaptchaToken);
+        if (!valid) {
+          return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 400 });
+        }
       }
     }
 
@@ -73,6 +76,18 @@ export async function POST(request: NextRequest) {
       contact_phone: (formData.get('contact_phone') as string)?.trim() || null,
       image: imageFilename,
     });
+
+    // Send notification emails (don't block the response)
+    sendSubmissionEmails({
+      name: (formData.get('name') as string).trim(),
+      date_time: formData.get('date_time') as string,
+      venue: (formData.get('venue') as string).trim(),
+      address: (formData.get('address') as string).trim(),
+      cost: (formData.get('cost') as string).trim(),
+      description: (formData.get('description') as string).trim(),
+      contact_name: (formData.get('contact_name') as string)?.trim() || null,
+      contact_email: contactEmail,
+    }).catch((err) => console.error('Email send error:', err));
 
     return NextResponse.json({ success: true, id }, { status: 201 });
   } catch {

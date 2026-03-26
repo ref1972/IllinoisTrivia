@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 declare global {
   interface Window {
@@ -15,6 +15,14 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [captchaEnabled, setCaptchaEnabled] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((res) => res.json())
+      .then((data) => setCaptchaEnabled(data.captcha_enabled))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -28,7 +36,7 @@ export default function SubmitPage() {
 
     try {
       let recaptchaToken = "";
-      if (siteKey && window.grecaptcha) {
+      if (captchaEnabled && siteKey && window.grecaptcha) {
         recaptchaToken = await new Promise<string>((resolve) => {
           window.grecaptcha.ready(async () => {
             const token = await window.grecaptcha.execute(siteKey, {

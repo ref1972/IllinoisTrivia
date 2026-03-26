@@ -33,6 +33,9 @@ export default function RootLayout({
               <Link href="/" className="text-[#58595B] font-medium hover:text-[#ED1C24] transition-colors">
                 Events
               </Link>
+              <Link href="/map" className="text-[#58595B] font-medium hover:text-[#ED1C24] transition-colors">
+                Map
+              </Link>
               <Link href="/submit" className="bg-[#ED1C24] hover:bg-red-700 text-white px-4 py-2 rounded font-medium transition-colors">
                 Submit an Event
               </Link>

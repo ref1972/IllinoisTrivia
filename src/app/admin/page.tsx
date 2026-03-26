@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
-import { getPendingEvents, getAllEvents } from "@/lib/db";
-import { approveEvent, rejectEvent } from "./actions";
+import { getPendingEvents, getAllEvents, isCaptchaEnabled } from "@/lib/db";
+import { approveEvent, rejectEvent, toggleCaptcha } from "./actions";
 import AdminSignOut from "./AdminSignOut";
 
 export const dynamic = "force-dynamic";
@@ -16,6 +16,7 @@ export default async function AdminPage() {
 
   const pendingEvents = getPendingEvents();
   const allEvents = getAllEvents();
+  const captchaOn = isCaptchaEnabled();
 
   return (
     <div>
@@ -23,6 +24,31 @@ export default async function AdminPage() {
         <h1 className="text-3xl font-bold text-[#58595B]">Admin Dashboard</h1>
         <AdminSignOut />
       </div>
+
+      <section className="mb-6">
+        <div className="bg-white rounded-lg shadow-sm border p-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-gray-700">reCAPTCHA</h3>
+            <p className="text-xs text-gray-500">
+              {captchaOn
+                ? "Enabled — bot submissions are blocked."
+                : "Disabled — bots (like Claude) can submit events."}
+            </p>
+          </div>
+          <form action={async () => { "use server"; await toggleCaptcha(); }}>
+            <button
+              type="submit"
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${
+                captchaOn
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "bg-red-600 text-white hover:bg-red-700"
+              }`}
+            >
+              {captchaOn ? "Disable CAPTCHA" : "Enable CAPTCHA"}
+            </button>
+          </form>
+        </div>
+      </section>
 
       <section className="mb-10">
         <h2 className="text-xl font-semibold text-[#58595B] mb-4">

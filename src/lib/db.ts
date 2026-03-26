@@ -24,6 +24,8 @@ db.exec(`
     facebook_url TEXT,
     website TEXT,
     image TEXT,
+    latitude REAL,
+    longitude REAL,
     is_workshop INTEGER NOT NULL DEFAULT 0,
     contact_name TEXT,
     contact_email TEXT,
@@ -33,15 +35,46 @@ db.exec(`
   )
 `);
 
-// Add image column if missing (existing databases)
-try {
-  db.exec(`ALTER TABLE events ADD COLUMN image TEXT`);
-} catch {
-  // Column already exists
+// Settings table for admin toggles
+db.exec(`
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+  )
+`);
+
+// Initialize captcha setting if not present
+const captchaSetting = db.prepare(`SELECT value FROM settings WHERE key = 'captcha_enabled'`).get();
+if (!captchaSetting) {
+  db.prepare(`INSERT INTO settings (key, value) VALUES ('captcha_enabled', 'true')`).run();
 }
 
-// Make contact fields nullable (existing databases)
-// SQLite doesn't support ALTER COLUMN, but new inserts will work with NULL
+export function getSetting(key: string): string | null {
+  const row = db.prepare(`SELECT value FROM settings WHERE key = ?`).get(key) as { value: string } | undefined;
+  return row?.value ?? null;
+}
+
+export function setSetting(key: string, value: string): void {
+  db.prepare(`INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)`).run(key, value);
+}
+
+export function isCaptchaEnabled(): boolean {
+  return getSetting('captcha_enabled') !== 'false';
+}
+
+// Add columns if missing (existing databases)
+const columnsToAdd = [
+  'image TEXT',
+  'latitude REAL',
+  'longitude REAL',
+];
+for (const col of columnsToAdd) {
+  try {
+    db.exec(`ALTER TABLE events ADD COLUMN ${col}`);
+  } catch {
+    // Column already exists
+  }
+}
 
 export function getApprovedEvents(): Event[] {
   return db.prepare(
@@ -92,8 +125,8 @@ export function updateEvent(id: number, data: Partial<Event>): void {
 
   const allowed = [
     'name', 'date_time', 'venue', 'address', 'cost', 'description',
-    'sponsors', 'facebook_url', 'website', 'image', 'is_workshop',
-    'contact_name', 'contact_email', 'contact_phone', 'status'
+    'sponsors', 'facebook_url', 'website', 'image', 'latitude', 'longitude',
+    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status'
   ] as const;
 
   for (const key of allowed) {
@@ -106,6 +139,12 @@ export function updateEvent(id: number, data: Partial<Event>): void {
   if (fields.length === 0) return;
   values.push(id);
   db.prepare(`UPDATE events SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+}
+
+export function getMapEvents(): Event[] {
+  return db.prepare(
+    `SELECT * FROM events WHERE status = 'approved' AND date_time >= datetime('now') AND latitude IS NOT NULL AND longitude IS NOT NULL ORDER BY date_time ASC`
+  ).all() as Event[];
 }
 
 export function updateEventStatus(id: number, status: 'approved' | 'rejected'): void {

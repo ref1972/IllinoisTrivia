@@ -10,6 +10,8 @@ export interface Event {
   facebook_url: string | null;
   website: string | null;
   image: string | null;
+  latitude: number | null;
+  longitude: number | null;
   is_workshop: number; // 0 or 1 (SQLite boolean)
   contact_name: string | null;
   contact_email: string | null;
@@ -18,4 +20,4 @@ export interface Event {
   created_at: string;
 }
 
-export type EventFormData = Omit<Event, 'id' | 'status' | 'created_at' | 'is_workshop'>;
+export type EventFormData = Omit<Event, 'id' | 'status' | 'created_at' | 'is_workshop' | 'latitude' | 'longitude'>;
