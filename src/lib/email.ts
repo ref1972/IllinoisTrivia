@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer';
+import { getSubscribersForRegion } from './db';
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -20,6 +21,62 @@ interface EventEmailData {
   description: string;
   contact_name?: string | null;
   contact_email?: string | null;
+}
+
+export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
+  await transporter.sendMail({
+    from: `"IllinoisTrivia.com" <${FROM_EMAIL}>`,
+    to,
+    subject,
+    html,
+  });
+}
+
+function extractCity(address: string): string {
+  const parts = address.split(',');
+  return parts.length >= 2 ? parts[parts.length - 2].trim() : address;
+}
+
+export async function notifySubscribers(event: { id: number; name: string; date_time: string; venue: string; address: string; cost: string }) {
+  const city = extractCity(event.address);
+  const subscribers = getSubscribersForRegion(city);
+  if (subscribers.length === 0) return;
+
+  const eventDate = new Date(event.date_time).toLocaleString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+
+  for (const sub of subscribers) {
+    const unsubUrl = `https://illinoistrivia.com/unsubscribe?token=${sub.unsubscribe_token}`;
+    try {
+      await transporter.sendMail({
+        from: `"IllinoisTrivia.com" <${FROM_EMAIL}>`,
+        to: sub.email,
+        subject: `New Trivia Night Event: ${event.name}`,
+        html: `
+          <h2>New Trivia Night Event Near You!</h2>
+          <table style="border-collapse: collapse; margin: 16px 0;">
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
+          </table>
+          <p style="margin-top: 20px;">
+            <a href="https://illinoistrivia.com/events/${event.id}" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+              View Event Details
+            </a>
+          </p>
+          <p style="margin-top: 24px; color: #999; font-size: 12px;">
+            You're receiving this because you subscribed to IllinoisTrivia.com event alerts.
+            <a href="${unsubUrl}" style="color: #999;">Unsubscribe</a>
+          </p>
+        `,
+      });
+    } catch (err) {
+      console.error(`Failed to notify subscriber ${sub.email}:`, err);
+    }
+  }
 }
 
 export async function sendSubmissionEmails(event: EventEmailData) {
