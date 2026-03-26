@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Script from "next/script";
+import SessionProvider from "@/components/SessionProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-gray-50 flex flex-col">
+        <SessionProvider>
         <header className="bg-white border-b-4 border-[#ED1C24] shadow-sm">
           <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="hover:opacity-80 transition-opacity">
@@ -58,6 +60,7 @@ export default function RootLayout({
             strategy="afterInteractive"
           />
         )}
+        </SessionProvider>
       </body>
     </html>
   );

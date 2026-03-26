@@ -1,17 +1,16 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { verifySessionToken, COOKIE_NAME } from "@/lib/auth";
+import { isAdmin } from "@/lib/auth";
 import { getPendingEvents, getAllEvents } from "@/lib/db";
 import { approveEvent, rejectEvent } from "./actions";
+import AdminSignOut from "./AdminSignOut";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminPage() {
-  const cookieStore = cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
+export default async function AdminPage() {
+  const admin = await isAdmin();
 
-  if (!token || !verifySessionToken(token)) {
+  if (!admin) {
     redirect("/admin/login");
   }
 
@@ -20,7 +19,10 @@ export default function AdminPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-[#58595B] mb-6">Admin Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold text-[#58595B]">Admin Dashboard</h1>
+        <AdminSignOut />
+      </div>
 
       <section className="mb-10">
         <h2 className="text-xl font-semibold text-[#58595B] mb-4">
@@ -66,7 +68,7 @@ export default function AdminPage() {
                   <div className="flex gap-2 flex-shrink-0">
                     <Link
                       href={`/admin/edit/${event.id}`}
-                      className="bg-[#58595B] text-white px-4 py-2 rounded text-sm font-medium hover:bg-blue-900 transition-colors"
+                      className="bg-[#58595B] text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-700 transition-colors"
                     >
                       Edit
                     </Link>

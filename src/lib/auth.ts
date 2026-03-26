@@ -1,36 +1,21 @@
-import crypto from 'crypto';
+import { getServerSession } from "next-auth";
 
-const COOKIE_NAME = 'admin_session';
+export async function isAdmin(): Promise<boolean> {
+  const session = await getServerSession();
+  if (!session?.user?.email) return false;
 
-function getSecret(): string {
-  return process.env.ADMIN_PASSWORD || 'default-password';
+  const allowed = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (allowed.length === 0) return !!session.user.email;
+  return allowed.includes(session.user.email.toLowerCase());
 }
 
-export function verifyPassword(password: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return false;
-  return crypto.timingSafeEqual(
-    Buffer.from(password),
-    Buffer.from(expected)
-  );
-}
-
-export function createSessionToken(): string {
-  const hmac = crypto.createHmac('sha256', getSecret());
-  hmac.update('authenticated');
-  return hmac.digest('hex');
-}
-
-export function verifySessionToken(token: string): boolean {
-  const expected = createSessionToken();
-  try {
-    return crypto.timingSafeEqual(
-      Buffer.from(token),
-      Buffer.from(expected)
-    );
-  } catch {
-    return false;
+export async function requireAdmin(): Promise<void> {
+  const admin = await isAdmin();
+  if (!admin) {
+    throw new Error("Unauthorized");
   }
 }
-
-export { COOKIE_NAME };

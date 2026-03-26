@@ -1,22 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifySessionToken, COOKIE_NAME } from '@/lib/auth';
+import { isAdmin } from '@/lib/auth';
 import { getEventByIdAdmin, updateEvent } from '@/lib/db';
-
-function requireAdmin() {
-  const cookieStore = cookies();
-  const token = cookieStore.get(COOKIE_NAME)?.value;
-  if (!token || !verifySessionToken(token)) {
-    return false;
-  }
-  return true;
-}
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!requireAdmin()) {
+  const admin = await isAdmin();
+  if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -37,7 +28,8 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  if (!requireAdmin()) {
+  const admin = await isAdmin();
+  if (!admin) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
