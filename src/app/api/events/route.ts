@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
       sponsors: (formData.get('sponsors') as string)?.trim() || null,
       facebook_url: (formData.get('facebook_url') as string)?.trim() || null,
       website: (formData.get('website') as string)?.trim() || null,
-      contact_name: (formData.get('contact_name') as string)?.trim() || null,
-      contact_email: contactEmail,
+      contact_name: (formData.get('contact_name') as string)?.trim() || '',
+      contact_email: contactEmail || '',
       contact_phone: (formData.get('contact_phone') as string)?.trim() || null,
       image: imageFilename,
     });

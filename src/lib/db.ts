@@ -113,8 +113,8 @@ export function insertEvent(data: EventFormData): number {
   `).run(
     data.name, data.date_time, data.venue, data.address, data.cost,
     data.description, data.sponsors || null, data.facebook_url || null,
-    data.website || null, data.image || null, data.contact_name || null,
-    data.contact_email || null, data.contact_phone || null
+    data.website || null, data.image || null, data.contact_name || '',
+    data.contact_email || '', data.contact_phone || null
   );
   return Number(result.lastInsertRowid);
 }
