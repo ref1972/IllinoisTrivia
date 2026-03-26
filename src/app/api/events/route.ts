@@ -90,7 +90,8 @@ export async function POST(request: NextRequest) {
     }).catch((err) => console.error('Email send error:', err));
 
     return NextResponse.json({ success: true, id }, { status: 201 });
-  } catch {
+  } catch (err) {
+    console.error('Event submission error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
