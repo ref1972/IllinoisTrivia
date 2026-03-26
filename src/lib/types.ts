@@ -9,9 +9,10 @@ export interface Event {
   sponsors: string | null;
   facebook_url: string | null;
   website: string | null;
+  image: string | null;
   is_workshop: number; // 0 or 1 (SQLite boolean)
-  contact_name: string;
-  contact_email: string;
+  contact_name: string | null;
+  contact_email: string | null;
   contact_phone: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;

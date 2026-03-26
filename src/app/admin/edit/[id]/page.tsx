@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Event } from "@/lib/types";
 
 export default function AdminEditPage({ params }: { params: { id: string } }) {
@@ -31,6 +32,32 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
     const form = e.currentTarget;
     const formData = new FormData(form);
 
+    const imageFile = formData.get("image") as File | null;
+    const hasNewImage = imageFile && imageFile.size > 0;
+
+    if (hasNewImage) {
+      // Upload image via FormData
+      const uploadData = new FormData();
+      uploadData.append("image", imageFile);
+      uploadData.append("eventId", params.id);
+
+      try {
+        const uploadRes = await fetch(`/api/admin/events/${params.id}/image`, {
+          method: "POST",
+          body: uploadData,
+        });
+
+        if (!uploadRes.ok) {
+          const data = await uploadRes.json();
+          throw new Error(data.error || "Image upload failed");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Image upload failed");
+        setSaving(false);
+        return;
+      }
+    }
+
     const body = {
       name: formData.get("name"),
       date_time: formData.get("date_time"),
@@ -42,8 +69,8 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
       facebook_url: formData.get("facebook_url") || null,
       website: formData.get("website") || null,
       is_workshop: formData.get("is_workshop") ? 1 : 0,
-      contact_name: formData.get("contact_name"),
-      contact_email: formData.get("contact_email"),
+      contact_name: formData.get("contact_name") || null,
+      contact_email: formData.get("contact_email") || null,
       contact_phone: formData.get("contact_phone") || null,
       status: formData.get("status"),
     };
@@ -154,14 +181,37 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
+        <div>
+          <label className={labelClass} htmlFor="image">Event Graphic</label>
+          {event.image && (
+            <div className="mb-2">
+              <Image
+                src={`/uploads/${event.image}`}
+                alt="Current event graphic"
+                width={300}
+                height={150}
+                className="rounded border object-cover"
+              />
+              <p className="text-xs text-gray-400 mt-1">Current image. Upload a new one to replace it.</p>
+            </div>
+          )}
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#58595B] file:text-white hover:file:bg-gray-700 file:cursor-pointer file:transition-colors"
+          />
+        </div>
+
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <label className={labelClass} htmlFor="contact_name">Contact Name *</label>
-            <input type="text" id="contact_name" name="contact_name" required className={inputClass} defaultValue={event.contact_name} />
+            <label className={labelClass} htmlFor="contact_name">Contact Name</label>
+            <input type="text" id="contact_name" name="contact_name" className={inputClass} defaultValue={event.contact_name || ""} />
           </div>
           <div>
-            <label className={labelClass} htmlFor="contact_email">Contact Email *</label>
-            <input type="email" id="contact_email" name="contact_email" required className={inputClass} defaultValue={event.contact_email} />
+            <label className={labelClass} htmlFor="contact_email">Contact Email</label>
+            <input type="email" id="contact_email" name="contact_email" className={inputClass} defaultValue={event.contact_email || ""} />
           </div>
           <div>
             <label className={labelClass} htmlFor="contact_phone">Contact Phone</label>
@@ -197,7 +247,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#58595B] text-white px-8 py-3 rounded font-medium hover:bg-blue-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#58595B] text-white px-8 py-3 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

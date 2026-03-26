@@ -1,45 +1,77 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { insertEvent } from '@/lib/db';
 import { verifyRecaptcha } from '@/lib/recaptcha';
+import { writeFile, mkdir } from 'fs/promises';
+import path from 'path';
+import crypto from 'crypto';
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
 
     // Verify reCAPTCHA
-    if (body.recaptchaToken) {
-      const valid = await verifyRecaptcha(body.recaptchaToken);
+    const recaptchaToken = formData.get('recaptchaToken') as string;
+    if (recaptchaToken) {
+      const valid = await verifyRecaptcha(recaptchaToken);
       if (!valid) {
         return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 400 });
       }
     }
 
     // Validate required fields
-    const required = ['name', 'date_time', 'venue', 'address', 'cost', 'description', 'contact_name', 'contact_email'];
+    const required = ['name', 'date_time', 'venue', 'address', 'cost', 'description'];
     for (const field of required) {
-      if (!body[field] || typeof body[field] !== 'string' || body[field].trim() === '') {
+      const value = formData.get(field) as string;
+      if (!value || value.trim() === '') {
         return NextResponse.json({ error: `${field} is required` }, { status: 400 });
       }
     }
 
-    // Basic email validation
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.contact_email)) {
+    // Validate email if provided
+    const contactEmail = (formData.get('contact_email') as string)?.trim() || null;
+    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
       return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
     }
 
+    // Handle image upload
+    let imageFilename: string | null = null;
+    const imageFile = formData.get('image') as File | null;
+
+    if (imageFile && imageFile.size > 0) {
+      if (!ALLOWED_TYPES.includes(imageFile.type)) {
+        return NextResponse.json({ error: 'Invalid image type. Use JPG, PNG, WebP, or GIF.' }, { status: 400 });
+      }
+      if (imageFile.size > MAX_IMAGE_SIZE) {
+        return NextResponse.json({ error: 'Image too large. Maximum size is 5MB.' }, { status: 400 });
+      }
+
+      const ext = imageFile.type.split('/')[1] === 'jpeg' ? 'jpg' : imageFile.type.split('/')[1];
+      imageFilename = `${crypto.randomUUID()}.${ext}`;
+
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      await mkdir(uploadDir, { recursive: true });
+
+      const buffer = Buffer.from(await imageFile.arrayBuffer());
+      await writeFile(path.join(uploadDir, imageFilename), buffer);
+    }
+
     const id = insertEvent({
-      name: body.name.trim(),
-      date_time: body.date_time,
-      venue: body.venue.trim(),
-      address: body.address.trim(),
-      cost: body.cost.trim(),
-      description: body.description.trim(),
-      sponsors: body.sponsors?.trim() || null,
-      facebook_url: body.facebook_url?.trim() || null,
-      website: body.website?.trim() || null,
-      contact_name: body.contact_name.trim(),
-      contact_email: body.contact_email.trim(),
-      contact_phone: body.contact_phone?.trim() || null,
+      name: (formData.get('name') as string).trim(),
+      date_time: formData.get('date_time') as string,
+      venue: (formData.get('venue') as string).trim(),
+      address: (formData.get('address') as string).trim(),
+      cost: (formData.get('cost') as string).trim(),
+      description: (formData.get('description') as string).trim(),
+      sponsors: (formData.get('sponsors') as string)?.trim() || null,
+      facebook_url: (formData.get('facebook_url') as string)?.trim() || null,
+      website: (formData.get('website') as string)?.trim() || null,
+      contact_name: (formData.get('contact_name') as string)?.trim() || null,
+      contact_email: contactEmail,
+      contact_phone: (formData.get('contact_phone') as string)?.trim() || null,
+      image: imageFilename,
     });
 
     return NextResponse.json({ success: true, id }, { status: 201 });

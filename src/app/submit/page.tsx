@@ -39,26 +39,29 @@ export default function SubmitPage() {
         });
       }
 
-      const body = {
-        name: formData.get("name"),
-        date_time: formData.get("date_time"),
-        venue: formData.get("venue"),
-        address: formData.get("address"),
-        cost: formData.get("cost"),
-        description: formData.get("description"),
-        sponsors: formData.get("sponsors") || null,
-        facebook_url: formData.get("facebook_url") || null,
-        website: formData.get("website") || null,
-        contact_name: formData.get("contact_name"),
-        contact_email: formData.get("contact_email"),
-        contact_phone: formData.get("contact_phone") || null,
-        recaptchaToken,
-      };
+      const submitData = new FormData();
+      submitData.append("name", formData.get("name") as string);
+      submitData.append("date_time", formData.get("date_time") as string);
+      submitData.append("venue", formData.get("venue") as string);
+      submitData.append("address", formData.get("address") as string);
+      submitData.append("cost", formData.get("cost") as string);
+      submitData.append("description", formData.get("description") as string);
+      if (formData.get("sponsors")) submitData.append("sponsors", formData.get("sponsors") as string);
+      if (formData.get("facebook_url")) submitData.append("facebook_url", formData.get("facebook_url") as string);
+      if (formData.get("website")) submitData.append("website", formData.get("website") as string);
+      if (formData.get("contact_name")) submitData.append("contact_name", formData.get("contact_name") as string);
+      if (formData.get("contact_email")) submitData.append("contact_email", formData.get("contact_email") as string);
+      if (formData.get("contact_phone")) submitData.append("contact_phone", formData.get("contact_phone") as string);
+      submitData.append("recaptchaToken", recaptchaToken);
+
+      const imageFile = formData.get("image") as File | null;
+      if (imageFile && imageFile.size > 0) {
+        submitData.append("image", imageFile);
+      }
 
       const res = await fetch("/api/events", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: submitData,
       });
 
       if (!res.ok) {
@@ -157,14 +160,26 @@ export default function SubmitPage() {
           </div>
         </div>
 
+        <div>
+          <label className={labelClass} htmlFor="image">Event Graphic</label>
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#ED1C24] file:text-white hover:file:bg-red-700 file:cursor-pointer file:transition-colors"
+          />
+          <p className="text-xs text-gray-400 mt-1">Optional. JPG, PNG, WebP, or GIF. Max 5MB.</p>
+        </div>
+
         <div className="grid sm:grid-cols-3 gap-4">
           <div>
-            <label className={labelClass} htmlFor="contact_name">Contact Name *</label>
-            <input type="text" id="contact_name" name="contact_name" required className={inputClass} />
+            <label className={labelClass} htmlFor="contact_name">Contact Name</label>
+            <input type="text" id="contact_name" name="contact_name" className={inputClass} />
           </div>
           <div>
-            <label className={labelClass} htmlFor="contact_email">Contact Email *</label>
-            <input type="email" id="contact_email" name="contact_email" required className={inputClass} />
+            <label className={labelClass} htmlFor="contact_email">Contact Email</label>
+            <input type="email" id="contact_email" name="contact_email" className={inputClass} />
           </div>
           <div>
             <label className={labelClass} htmlFor="contact_phone">Contact Phone</label>

@@ -23,14 +23,25 @@ db.exec(`
     sponsors TEXT,
     facebook_url TEXT,
     website TEXT,
+    image TEXT,
     is_workshop INTEGER NOT NULL DEFAULT 0,
-    contact_name TEXT NOT NULL,
-    contact_email TEXT NOT NULL,
+    contact_name TEXT,
+    contact_email TEXT,
     contact_phone TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   )
 `);
+
+// Add image column if missing (existing databases)
+try {
+  db.exec(`ALTER TABLE events ADD COLUMN image TEXT`);
+} catch {
+  // Column already exists
+}
+
+// Make contact fields nullable (existing databases)
+// SQLite doesn't support ALTER COLUMN, but new inserts will work with NULL
 
 export function getApprovedEvents(): Event[] {
   return db.prepare(
@@ -64,13 +75,13 @@ export function getAllEvents(): Event[] {
 
 export function insertEvent(data: EventFormData): number {
   const result = db.prepare(`
-    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, contact_name, contact_email, contact_phone)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.name, data.date_time, data.venue, data.address, data.cost,
     data.description, data.sponsors || null, data.facebook_url || null,
-    data.website || null, data.contact_name,
-    data.contact_email, data.contact_phone || null
+    data.website || null, data.image || null, data.contact_name || null,
+    data.contact_email || null, data.contact_phone || null
   );
   return Number(result.lastInsertRowid);
 }
@@ -81,7 +92,7 @@ export function updateEvent(id: number, data: Partial<Event>): void {
 
   const allowed = [
     'name', 'date_time', 'venue', 'address', 'cost', 'description',
-    'sponsors', 'facebook_url', 'website', 'is_workshop',
+    'sponsors', 'facebook_url', 'website', 'image', 'is_workshop',
     'contact_name', 'contact_email', 'contact_phone', 'status'
   ] as const;
 

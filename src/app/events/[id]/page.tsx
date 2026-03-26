@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getEventById } from "@/lib/db";
 
@@ -20,6 +21,10 @@ function formatTime(dateStr: string): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function googleMapsUrl(address: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
 }
 
 export default function EventPage({ params }: { params: { id: string } }) {
@@ -50,6 +55,18 @@ export default function EventPage({ params }: { params: { id: string } }) {
           )}
         </div>
 
+        {event.image && (
+          <div className="mt-4 mb-6">
+            <Image
+              src={`/uploads/${event.image}`}
+              alt={event.name}
+              width={800}
+              height={400}
+              className="rounded-lg w-full max-h-96 object-cover"
+            />
+          </div>
+        )}
+
         <div className="grid sm:grid-cols-2 gap-6 mt-6">
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
@@ -73,26 +90,41 @@ export default function EventPage({ params }: { params: { id: string } }) {
               Venue
             </h3>
             <p className="text-lg font-medium text-gray-800">{event.venue}</p>
-            <p className="text-gray-600">{event.address}</p>
+            <a
+              href={googleMapsUrl(event.address)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#ED1C24] hover:underline inline-flex items-center gap-1"
+            >
+              {event.address}
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </a>
           </div>
 
-          <div>
-            <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-              Contact
-            </h3>
-            <p className="text-gray-800">{event.contact_name}</p>
-            <p>
-              <a
-                href={`mailto:${event.contact_email}`}
-                className="text-[#ED1C24] hover:underline"
-              >
-                {event.contact_email}
-              </a>
-            </p>
-            {event.contact_phone && (
-              <p className="text-gray-600">{event.contact_phone}</p>
-            )}
-          </div>
+          {(event.contact_name || event.contact_email || event.contact_phone) && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                Contact
+              </h3>
+              {event.contact_name && <p className="text-gray-800">{event.contact_name}</p>}
+              {event.contact_email && (
+                <p>
+                  <a
+                    href={`mailto:${event.contact_email}`}
+                    className="text-[#ED1C24] hover:underline"
+                  >
+                    {event.contact_email}
+                  </a>
+                </p>
+              )}
+              {event.contact_phone && (
+                <p className="text-gray-600">{event.contact_phone}</p>
+              )}
+            </div>
+          )}
         </div>
 
         {event.sponsors && (
@@ -130,7 +162,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
                 href={event.website}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-[#58595B] text-white px-4 py-2 rounded font-medium text-sm hover:bg-blue-900 transition-colors"
+                className="inline-flex items-center gap-1.5 bg-[#58595B] text-white px-4 py-2 rounded font-medium text-sm hover:bg-gray-700 transition-colors"
               >
                 Event Website
               </a>

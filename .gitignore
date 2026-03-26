@@ -31,6 +31,9 @@ yarn-error.log*
 # database
 /data/
 
+# uploads
+/public/uploads/
+
 # vercel
 .vercel
 
