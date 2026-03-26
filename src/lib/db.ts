@@ -129,10 +129,13 @@ export function updateEvent(id: number, data: Partial<Event>): void {
     'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status'
   ] as const;
 
+  const notNullFields = new Set(['contact_name', 'contact_email']);
+
   for (const key of allowed) {
     if (key in data) {
       fields.push(`${key} = ?`);
-      values.push(data[key as keyof Event] ?? null);
+      const val = data[key as keyof Event] ?? null;
+      values.push(notNullFields.has(key) ? (val || '') : val);
     }
   }
 
