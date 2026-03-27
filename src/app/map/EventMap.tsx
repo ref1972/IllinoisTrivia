@@ -19,7 +19,7 @@ interface MapEvent {
 // Custom marker icons
 const defaultIcon = L.divIcon({
   className: "custom-marker",
-  html: `<div style="background-color: #ED1C24; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
+  html: `<div style="background-color: #C83803; width: 28px; height: 28px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>`,
   iconSize: [28, 28],
   iconAnchor: [14, 14],
   popupAnchor: [0, -14],
@@ -71,7 +71,7 @@ export default function EventMap({ events }: { events: MapEvent[] }) {
 
       const popup = `
         <div style="min-width: 200px;">
-          <h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: bold; color: #58595B;">
+          <h3 style="margin: 0 0 4px 0; font-size: 15px; font-weight: bold; color: #0B1C3A;">
             ${event.name}
           </h3>
           ${event.is_workshop ? '<span style="background: #F59E0B; color: white; font-size: 10px; font-weight: bold; padding: 1px 6px; border-radius: 3px; text-transform: uppercase;">Trivia Workshop</span>' : ''}
@@ -79,11 +79,11 @@ export default function EventMap({ events }: { events: MapEvent[] }) {
             <strong>${event.venue}</strong><br/>
             ${event.address}
           </p>
-          <p style="margin: 4px 0; font-size: 13px; color: #ED1C24; font-weight: 600;">
+          <p style="margin: 4px 0; font-size: 13px; color: #C83803; font-weight: 600;">
             ${formatDate(event.date_time)} at ${formatTime(event.date_time)}
           </p>
           <p style="margin: 2px 0 6px 0; font-size: 13px; color: #666;">${event.cost}</p>
-          <a href="/events/${event.id}" style="color: #ED1C24; font-size: 13px; font-weight: 500; text-decoration: none;">
+          <a href="/events/${event.id}" style="color: #C83803; font-size: 13px; font-weight: 500; text-decoration: none;">
             View Details &rarr;
           </a>
         </div>

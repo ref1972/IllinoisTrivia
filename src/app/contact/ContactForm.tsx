@@ -29,7 +29,7 @@ export default function ContactForm() {
     }
   }
 
-  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#58595B]";
+  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[#0B1C3A]";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
   if (status === "success") {
@@ -61,7 +61,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full bg-[#ED1C24] text-white py-2 rounded font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+        className="w-full bg-[#C83803] text-white py-2 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50"
       >
         {status === "loading" ? "Sending..." : "Send Message"}
       </button>

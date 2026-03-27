@@ -2,6 +2,7 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import TagSelector from "@/components/TagSelector";
 
 export default function AdminCreatePage() {
   const router = useRouter();
@@ -28,6 +29,7 @@ export default function AdminCreatePage() {
       contact_name: formData.get("contact_name") || null,
       contact_email: formData.get("contact_email") || null,
       contact_phone: formData.get("contact_phone") || null,
+      tags: formData.get("tags") || null,
       status: formData.get("status") || "approved",
     };
 
@@ -51,15 +53,15 @@ export default function AdminCreatePage() {
     }
   }
 
-  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#58595B] focus:border-transparent";
+  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B1C3A] focus:border-transparent";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
     <div>
-      <button onClick={() => router.push("/admin")} className="text-[#ED1C24] hover:underline text-sm mb-6 inline-block">
+      <button onClick={() => router.push("/admin")} className="text-[#C83803] hover:underline text-sm mb-6 inline-block">
         &larr; Back to admin
       </button>
-      <h1 className="text-3xl font-bold text-[#58595B] mb-6">Create Event</h1>
+      <h1 className="text-3xl font-bold text-[#0B1C3A] mb-6">Create Event</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 mb-4">{error}</div>
@@ -95,6 +97,11 @@ export default function AdminCreatePage() {
         <div>
           <label className={labelClass} htmlFor="description">Description *</label>
           <textarea id="description" name="description" required rows={4} className={inputClass} />
+        </div>
+
+        <div>
+          <label className={labelClass}>Event Details</label>
+          <TagSelector />
         </div>
 
         <div>
@@ -148,7 +155,7 @@ export default function AdminCreatePage() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#ED1C24] text-white px-8 py-3 rounded font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            className="bg-[#C83803] text-white px-8 py-3 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50"
           >
             {saving ? "Creating..." : "Create Event"}
           </button>

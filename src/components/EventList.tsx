@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { Event } from "@/lib/types";
+import EventTagBadges from "@/components/EventTagBadges";
 
 type SortOption = "date" | "name";
 
@@ -67,7 +68,7 @@ export default function EventList({ events }: { events: Event[] }) {
     return result;
   }, [events, search, cityFilter, costFilter, sort]);
 
-  const selectClass = "text-sm border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#58595B]";
+  const selectClass = "text-sm border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-[#0B1C3A]";
 
   return (
     <div>
@@ -78,7 +79,7 @@ export default function EventList({ events }: { events: Event[] }) {
           placeholder="Search events..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-1 text-sm border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#58595B]"
+          className="flex-1 text-sm border border-gray-300 rounded px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#0B1C3A]"
         />
         <select value={cityFilter} onChange={e => setCityFilter(e.target.value)} className={selectClass}>
           <option value="all">All Cities</option>
@@ -93,13 +94,13 @@ export default function EventList({ events }: { events: Event[] }) {
           <span className="text-sm text-gray-500 whitespace-nowrap">Sort:</span>
           <button
             onClick={() => setSort("date")}
-            className={`text-sm px-3 py-1 rounded font-medium transition-colors ${sort === "date" ? "bg-[#58595B] text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
+            className={`text-sm px-3 py-1 rounded font-medium transition-colors ${sort === "date" ? "bg-[#0B1C3A] text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
           >
             Date
           </button>
           <button
             onClick={() => setSort("name")}
-            className={`text-sm px-3 py-1 rounded font-medium transition-colors ${sort === "name" ? "bg-[#58595B] text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
+            className={`text-sm px-3 py-1 rounded font-medium transition-colors ${sort === "name" ? "bg-[#0B1C3A] text-white" : "bg-gray-200 text-gray-600 hover:bg-gray-300"}`}
           >
             Name
           </button>
@@ -109,7 +110,7 @@ export default function EventList({ events }: { events: Event[] }) {
       {filtered.length === 0 ? (
         <div className="text-center py-12 bg-white rounded-lg border">
           <p className="text-gray-500">No events match your search.</p>
-          <button onClick={() => { setSearch(""); setCityFilter("all"); setCostFilter("all"); }} className="mt-2 text-sm text-[#ED1C24] hover:underline">
+          <button onClick={() => { setSearch(""); setCityFilter("all"); setCostFilter("all"); }} className="mt-2 text-sm text-[#C83803] hover:underline">
             Clear filters
           </button>
         </div>
@@ -128,7 +129,7 @@ export default function EventList({ events }: { events: Event[] }) {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h2 className="text-xl font-semibold text-[#58595B]">{event.name}</h2>
+                      <h2 className="text-xl font-semibold text-[#0B1C3A]">{event.name}</h2>
                       {event.is_workshop === 1 && (
                         <span className="inline-block bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">
                           Trivia Workshop
@@ -138,8 +139,11 @@ export default function EventList({ events }: { events: Event[] }) {
                     <p className="text-gray-600 mt-1">{event.venue} &mdash; {event.address}</p>
                   </div>
                   <div className="text-right flex-shrink-0">
-                    <p className="text-[#ED1C24] font-semibold">{formatDate(event.date_time)}</p>
+                    <p className="text-[#C83803] font-semibold">{formatDate(event.date_time)}</p>
                     <p className="text-gray-500 text-sm">{formatTime(event.date_time)} &bull; {event.cost}</p>
+                    <div className="mt-1.5 flex justify-end">
+                      <EventTagBadges tags={event.tags} />
+                    </div>
                   </div>
                 </div>
               </Link>

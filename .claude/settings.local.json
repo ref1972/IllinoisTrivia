@@ -32,7 +32,9 @@
       "Bash(git push:*)",
       "Bash(node -e \"require\\(''''./src/lib/email.ts''''\\)\")",
       "Bash(npx tsc:*)",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(xargs sed:*)"
     ]
   }
 }

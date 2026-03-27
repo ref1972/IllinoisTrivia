@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import VenueCombobox from "@/components/VenueCombobox";
+import TagSelector from "@/components/TagSelector";
 
 declare global {
   interface Window {
@@ -61,6 +62,7 @@ export default function SubmitPage() {
       if (formData.get("contact_name")) submitData.append("contact_name", formData.get("contact_name") as string);
       if (formData.get("contact_email")) submitData.append("contact_email", formData.get("contact_email") as string);
       if (formData.get("contact_phone")) submitData.append("contact_phone", formData.get("contact_phone") as string);
+      if (formData.get("tags")) submitData.append("tags", formData.get("tags") as string);
       submitData.append("recaptchaToken", recaptchaToken);
 
       const imageFile = formData.get("image") as File | null;
@@ -101,12 +103,12 @@ export default function SubmitPage() {
   }
 
   const inputClass =
-    "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#58595B] focus:border-transparent";
+    "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B1C3A] focus:border-transparent";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-[#58595B] mb-2">Submit an Event</h1>
+      <h1 className="text-3xl font-bold text-[#0B1C3A] mb-2">Submit an Event</h1>
       <p className="text-gray-600 mb-6">
         Submit your trivia night fundraiser for listing. Events are reviewed
         before being published.
@@ -146,6 +148,11 @@ export default function SubmitPage() {
         </div>
 
         <div>
+          <label className={labelClass}>Event Details <span className="text-gray-400 font-normal">(optional)</span></label>
+          <TagSelector />
+        </div>
+
+        <div>
           <label className={labelClass} htmlFor="sponsors">Presenting Sponsors</label>
           <input type="text" id="sponsors" name="sponsors" className={inputClass} placeholder="e.g. Local Business Name, Another Sponsor" />
         </div>
@@ -168,7 +175,7 @@ export default function SubmitPage() {
             id="image"
             name="image"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#ED1C24] file:text-white hover:file:bg-red-700 file:cursor-pointer file:transition-colors"
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#C83803] file:text-white hover:file:bg-red-700 file:cursor-pointer file:transition-colors"
           />
           <p className="text-xs text-gray-400 mt-1">Optional. JPG, PNG, WebP, or GIF. Max 5MB.</p>
         </div>
@@ -192,7 +199,7 @@ export default function SubmitPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="bg-[#ED1C24] text-white px-8 py-3 rounded font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#C83803] text-white px-8 py-3 rounded font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {submitting ? "Submitting..." : "Submit Event"}
           </button>

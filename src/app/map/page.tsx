@@ -21,7 +21,7 @@ export default function MapPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-[#58595B] mb-2">Event Map</h1>
+        <h1 className="text-3xl font-bold text-[#0B1C3A] mb-2">Event Map</h1>
         <p className="text-gray-600">
           Find trivia night fundraisers near you across Illinois.
         </p>

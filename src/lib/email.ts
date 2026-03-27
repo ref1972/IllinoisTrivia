@@ -46,14 +46,14 @@ export async function notifySubscribers(event: { id: number; name: string; date_
         html: `
           <h2>New Trivia Night Event Near You!</h2>
           <table style="border-collapse: collapse; margin: 16px 0;">
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
           </table>
           <p style="margin-top: 20px;">
-            <a href="https://illinoistrivia.com/events/${event.id}" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+            <a href="https://illinoistrivia.com/events/${event.id}" style="background-color: #C83803; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
               View Event Details
             </a>
           </p>
@@ -89,16 +89,16 @@ export async function sendSubmissionEmails(event: EventEmailData) {
         <h2>New Event Submitted for Review</h2>
         <p>A new trivia night event has been submitted on IllinoisTrivia.com and is awaiting your approval.</p>
         <table style="border-collapse: collapse; margin: 16px 0;">
-          <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
-          <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
-          <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
-          <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
-          <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
-          ${event.contact_name ? `<tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Contact</td><td style="padding: 6px 12px;">${event.contact_name}${event.contact_email ? ` (${event.contact_email})` : ''}</td></tr>` : ''}
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
+          ${event.contact_name ? `<tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Contact</td><td style="padding: 6px 12px;">${event.contact_name}${event.contact_email ? ` (${event.contact_email})` : ''}</td></tr>` : ''}
         </table>
         <p style="color: #666;">${event.description}</p>
         <p style="margin-top: 20px;">
-          <a href="https://illinoistrivia.com/admin" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+          <a href="https://illinoistrivia.com/admin" style="background-color: #C83803; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
             Review in Admin Dashboard
           </a>
         </p>
@@ -119,11 +119,11 @@ export async function sendSubmissionEmails(event: EventEmailData) {
           <h2>Thanks for Submitting Your Event!</h2>
           <p>We've received your trivia night event submission on <a href="https://illinoistrivia.com">IllinoisTrivia.com</a>. Here's a summary:</p>
           <table style="border-collapse: collapse; margin: 16px 0;">
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
-            <tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Event</td><td style="padding: 6px 12px;">${event.name}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Date</td><td style="padding: 6px 12px;">${eventDate}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Venue</td><td style="padding: 6px 12px;">${event.venue}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Address</td><td style="padding: 6px 12px;">${event.address}</td></tr>
+            <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Cost</td><td style="padding: 6px 12px;">${event.cost}</td></tr>
           </table>
           <p>Your event is pending review and will appear on the site once approved. You'll typically hear back within 24-48 hours.</p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
@@ -148,13 +148,13 @@ export async function sendApprovalEmail(event: { name: string; id: number; conta
         <h2>Your Event is Live!</h2>
         <p>Your trivia night event <strong>${event.name}</strong> has been approved and is now listed on <a href="https://illinoistrivia.com">IllinoisTrivia.com</a>.</p>
         <p style="margin-top: 20px;">
-          <a href="https://illinoistrivia.com/events/${event.id}" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+          <a href="https://illinoistrivia.com/events/${event.id}" style="background-color: #C83803; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
             View Your Event
           </a>
         </p>
         <p style="margin-top: 24px;">Need to make changes or remove the listing? Use your private management link:</p>
         <p>
-          <a href="${manageUrl}" style="color: #ED1C24;">${manageUrl}</a>
+          <a href="${manageUrl}" style="color: #C83803;">${manageUrl}</a>
         </p>
         <p style="color: #999; font-size: 12px; margin-top: 16px;">Keep this link private — anyone with it can request changes to your event.</p>
       `,
@@ -177,12 +177,12 @@ export async function sendChangeRequestNotification(event: { name: string; id: n
           <h3>Requested Changes:</h3>
           <table style="border-collapse: collapse; margin: 16px 0;">
             ${Object.entries(changes).map(([key, val]) =>
-              `<tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">${key}</td><td style="padding: 6px 12px;">${val}</td></tr>`
+              `<tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">${key}</td><td style="padding: 6px 12px;">${val}</td></tr>`
             ).join('')}
           </table>
         ` : '<p>The submitter has requested this event be deleted.</p>'}
         <p style="margin-top: 20px;">
-          <a href="${process.env.NEXTAUTH_URL || 'https://illinoistrivia.com'}/admin" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+          <a href="${process.env.NEXTAUTH_URL || 'https://illinoistrivia.com'}/admin" style="background-color: #C83803; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
             Review in Admin Dashboard
           </a>
         </p>

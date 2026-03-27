@@ -29,11 +29,11 @@ export default function AdminEventRow({ event, views }: { event: Event; views: n
       <td className="px-4 py-2 text-gray-500">{views}</td>
       <td className="px-4 py-2">
         <div className="flex items-center gap-2">
-          <Link href={`/admin/edit/${event.id}`} className="text-[#ED1C24] hover:underline text-sm">
+          <Link href={`/admin/edit/${event.id}`} className="text-[#C83803] hover:underline text-sm">
             Edit
           </Link>
           <form action={cloneEvent.bind(null, event.id)}>
-            <button type="submit" className="text-[#58595B] hover:underline text-sm">
+            <button type="submit" className="text-[#0B1C3A] hover:underline text-sm">
               Duplicate
             </button>
           </form>

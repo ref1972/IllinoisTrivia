@@ -9,8 +9,10 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        navy: "#13294B",
-        illini: "#E84A27",
+        bears: {
+          navy: "#0B1C3A",
+          orange: "#C83803",
+        },
       },
     },
   },

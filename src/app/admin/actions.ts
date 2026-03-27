@@ -8,7 +8,7 @@ import {
   setSetting, isCaptchaEnabled, deleteEvent,
   duplicateEvent, insertEventAdmin,
   getChangeRequestById, updateChangeRequestStatus,
-  upsertVenue,
+  upsertVenue, getEventsWithoutCoords,
 } from "@/lib/db";
 import { geocodeAddress } from "@/lib/geocode";
 import { notifySubscribers, sendApprovalEmail, sendChangeRequestOutcome } from "@/lib/email";
@@ -144,6 +144,17 @@ export async function toggleCaptcha() {
   setSetting("captcha_enabled", current ? "false" : "true");
   revalidatePath("/admin");
   revalidatePath("/submit");
+}
+
+export async function regeocodeMissingEvents() {
+  await requireAdmin();
+  const events = getEventsWithoutCoords();
+  for (const event of events) {
+    const coords = await geocodeAddress(event.address);
+    if (coords) updateEvent(event.id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
+  }
+  revalidateAll();
+  return events.length;
 }
 
 export async function saveEvent(id: number, data: Partial<Event>) {

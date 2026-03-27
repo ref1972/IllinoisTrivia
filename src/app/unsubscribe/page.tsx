@@ -10,7 +10,7 @@ export default function UnsubscribePage({
 }) {
   return (
     <div className="max-w-md mx-auto mt-16">
-      <h1 className="text-2xl font-bold text-[#58595B] mb-6 text-center">Unsubscribe</h1>
+      <h1 className="text-2xl font-bold text-[#0B1C3A] mb-6 text-center">Unsubscribe</h1>
       <UnsubscribeForm token={searchParams.token || ""} />
     </div>
   );

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
-import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests } from "@/lib/db";
-import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest } from "./actions";
+import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests, getEventsWithoutCoords } from "@/lib/db";
+import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest, regeocodeMissingEvents } from "./actions";
 import AdminSignOut from "./AdminSignOut";
 import AdminBulkActions from "./AdminBulkActions";
 import AdminEventRow from "./AdminEventRow";
@@ -19,11 +19,12 @@ export default async function AdminPage() {
   const stats = getTotalStats();
   const viewCounts = getEventViewCounts();
   const changeRequests = getPendingChangeRequests();
+  const missingCoordsEvents = getEventsWithoutCoords();
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-[#58595B]">Admin Dashboard</h1>
+        <h1 className="text-3xl font-bold text-[#0B1C3A]">Admin Dashboard</h1>
         <div className="flex items-center gap-3">
           <Link
             href="/admin/venues"
@@ -33,7 +34,7 @@ export default async function AdminPage() {
           </Link>
           <Link
             href="/admin/create"
-            className="bg-[#ED1C24] text-white px-4 py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors"
+            className="bg-[#C83803] text-white px-4 py-2 rounded text-sm font-medium hover:bg-orange-800 transition-colors"
           >
             + Create Event
           </Link>
@@ -50,7 +51,7 @@ export default async function AdminPage() {
           { label: "Total Views", value: stats.totalViews },
         ].map(s => (
           <div key={s.label} className="bg-white rounded-lg border shadow-sm p-4 text-center">
-            <p className="text-2xl font-bold text-[#58595B]">{s.value}</p>
+            <p className="text-2xl font-bold text-[#0B1C3A]">{s.value}</p>
             <p className="text-xs text-gray-500 mt-1">{s.label}</p>
           </div>
         ))}
@@ -68,7 +69,7 @@ export default async function AdminPage() {
           <form action={async () => { "use server"; await toggleCaptcha(); }}>
             <button
               type="submit"
-              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${captchaOn ? "bg-green-600 text-white hover:bg-green-700" : "bg-red-600 text-white hover:bg-red-700"}`}
+              className={`px-4 py-2 rounded text-sm font-medium transition-colors ${captchaOn ? "bg-green-600 text-white hover:bg-green-700" : "bg-red-600 text-white hover:bg-orange-800"}`}
             >
               {captchaOn ? "Disable CAPTCHA" : "Enable CAPTCHA"}
             </button>
@@ -76,9 +77,29 @@ export default async function AdminPage() {
         </div>
       </section>
 
+      {/* Map Tools */}
+      {missingCoordsEvents.length > 0 && (
+        <section className="mb-6">
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-semibold text-yellow-800">Map: Missing Coordinates</h3>
+              <p className="text-xs text-yellow-700 mt-0.5">
+                {missingCoordsEvents.length} approved event{missingCoordsEvents.length !== 1 ? "s" : ""} won&apos;t appear on the map:{" "}
+                {missingCoordsEvents.map(e => e.name).join(", ")}
+              </p>
+            </div>
+            <form action={async () => { "use server"; await regeocodeMissingEvents(); }}>
+              <button type="submit" className="bg-yellow-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-yellow-700 transition-colors whitespace-nowrap ml-4">
+                Fix Now
+              </button>
+            </form>
+          </div>
+        </section>
+      )}
+
       {/* Pending events with bulk actions */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-[#58595B] mb-4">
+        <h2 className="text-xl font-semibold text-[#0B1C3A] mb-4">
           Pending Events ({pendingEvents.length})
         </h2>
 
@@ -103,7 +124,7 @@ export default async function AdminPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0">
-                    <Link href={`/admin/edit/${event.id}`} className="bg-[#58595B] text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-700 transition-colors">
+                    <Link href={`/admin/edit/${event.id}`} className="bg-[#0B1C3A] text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-700 transition-colors">
                       Edit
                     </Link>
                     <form action={async () => { "use server"; await approveEvent(event.id); }}>
@@ -112,7 +133,7 @@ export default async function AdminPage() {
                       </button>
                     </form>
                     <form action={async () => { "use server"; await rejectEvent(event.id); }}>
-                      <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-red-700 transition-colors">
+                      <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-orange-800 transition-colors">
                         Reject
                       </button>
                     </form>
@@ -126,7 +147,7 @@ export default async function AdminPage() {
 
       {/* Change Requests */}
       <section className="mb-10">
-        <h2 className="text-xl font-semibold text-[#58595B] mb-4">
+        <h2 className="text-xl font-semibold text-[#0B1C3A] mb-4">
           Change Requests ({changeRequests.length})
         </h2>
         {changeRequests.length === 0 ? (
@@ -175,7 +196,7 @@ export default async function AdminPage() {
                         </button>
                       </form>
                       <form action={async () => { "use server"; await rejectChangeRequest(req.id); }}>
-                        <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-red-700 transition-colors">
+                        <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-orange-800 transition-colors">
                           Reject
                         </button>
                       </form>
@@ -190,7 +211,7 @@ export default async function AdminPage() {
 
       {/* All events table */}
       <section>
-        <h2 className="text-xl font-semibold text-[#58595B] mb-4">
+        <h2 className="text-xl font-semibold text-[#0B1C3A] mb-4">
           All Events ({allEvents.length})
         </h2>
         {allEvents.length === 0 ? (

@@ -72,7 +72,7 @@ export default function AdminBulkActions({
             <button
               onClick={handleBulkReject}
               disabled={loading}
-              className="bg-red-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+              className="bg-red-600 text-white px-3 py-1 rounded text-sm font-medium hover:bg-orange-800 disabled:opacity-50 transition-colors"
             >
               Reject Selected
             </button>

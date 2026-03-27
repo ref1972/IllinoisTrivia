@@ -40,7 +40,7 @@ export default function UnsubscribeForm({ token }: { token: string }) {
     return (
       <div className="bg-white rounded-lg border shadow-sm p-6 text-center">
         <p className="text-gray-700 mb-4">You have been unsubscribed from IllinoisTrivia.com event alerts.</p>
-        <Link href="/" className="text-[#ED1C24] hover:underline text-sm">Back to home</Link>
+        <Link href="/" className="text-[#C83803] hover:underline text-sm">Back to home</Link>
       </div>
     );
   }
@@ -56,7 +56,7 @@ export default function UnsubscribeForm({ token }: { token: string }) {
       <button
         onClick={handleUnsubscribe}
         disabled={status === "loading"}
-        className="bg-[#58595B] text-white px-6 py-2 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
+        className="bg-[#0B1C3A] text-white px-6 py-2 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50"
       >
         {status === "loading" ? "Processing..." : "Unsubscribe"}
       </button>

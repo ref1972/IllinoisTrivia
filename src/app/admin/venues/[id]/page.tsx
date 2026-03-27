@@ -13,12 +13,12 @@ export default async function EditVenuePage({ params }: { params: { id: string }
   const venue = getVenueById(Number(params.id));
   if (!venue) return notFound();
 
-  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ED1C24]";
+  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]";
 
   return (
     <div className="max-w-xl">
       <Link href="/admin/venues" className="text-sm text-gray-500 hover:text-gray-700 mb-4 block">← Back to Venues</Link>
-      <h1 className="text-2xl font-bold text-[#58595B] mb-6">Edit Venue</h1>
+      <h1 className="text-2xl font-bold text-[#0B1C3A] mb-6">Edit Venue</h1>
 
       <form
         action={async (fd: FormData) => {
@@ -45,7 +45,7 @@ export default async function EditVenuePage({ params }: { params: { id: string }
           <input name="website" type="url" defaultValue={venue.website || ""} className={inputClass} />
         </div>
         <div className="flex gap-3 pt-2">
-          <button type="submit" className="bg-[#ED1C24] text-white px-5 py-2 rounded font-medium hover:bg-red-700 transition-colors">
+          <button type="submit" className="bg-[#C83803] text-white px-5 py-2 rounded font-medium hover:bg-orange-800 transition-colors">
             Save Changes
           </button>
           <Link href="/admin/venues" className="bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium hover:bg-gray-300 transition-colors">

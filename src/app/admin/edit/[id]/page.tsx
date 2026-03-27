@@ -3,7 +3,8 @@
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Event } from "@/lib/types";
+import { Event, EventTags } from "@/lib/types";
+import TagSelector from "@/components/TagSelector";
 
 export default function AdminEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -72,6 +73,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
       contact_name: formData.get("contact_name") || null,
       contact_email: formData.get("contact_email") || null,
       contact_phone: formData.get("contact_phone") || null,
+      tags: formData.get("tags") || null,
       status: formData.get("status"),
     };
 
@@ -105,19 +107,19 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
   }
 
   const inputClass =
-    "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#58595B] focus:border-transparent";
+    "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B1C3A] focus:border-transparent";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
 
   return (
     <div>
       <button
         onClick={() => router.push("/admin")}
-        className="text-[#ED1C24] hover:underline text-sm mb-6 inline-block"
+        className="text-[#C83803] hover:underline text-sm mb-6 inline-block"
       >
         &larr; Back to admin
       </button>
 
-      <h1 className="text-3xl font-bold text-[#58595B] mb-6">Edit Event</h1>
+      <h1 className="text-3xl font-bold text-[#0B1C3A] mb-6">Edit Event</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 mb-4">
@@ -166,6 +168,11 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
         </div>
 
         <div>
+          <label className={labelClass}>Event Details</label>
+          <TagSelector defaultTags={event.tags ? JSON.parse(event.tags) as EventTags : {}} />
+        </div>
+
+        <div>
           <label className={labelClass} htmlFor="sponsors">Presenting Sponsors</label>
           <input type="text" id="sponsors" name="sponsors" className={inputClass} defaultValue={event.sponsors || ""} />
         </div>
@@ -200,7 +207,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
             id="image"
             name="image"
             accept="image/jpeg,image/png,image/webp,image/gif"
-            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#58595B] file:text-white hover:file:bg-gray-700 file:cursor-pointer file:transition-colors"
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#0B1C3A] file:text-white hover:file:bg-gray-700 file:cursor-pointer file:transition-colors"
           />
         </div>
 
@@ -247,7 +254,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#58595B] text-white px-8 py-3 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-[#0B1C3A] text-white px-8 py-3 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

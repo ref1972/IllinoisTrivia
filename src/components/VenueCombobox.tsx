@@ -64,7 +64,7 @@ export default function VenueCombobox({ defaultName = "", defaultAddress = "", o
           onFocus={() => results.length > 0 && setOpen(true)}
           required
           placeholder="Start typing to search existing venues..."
-          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ED1C24]"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]"
         />
         {open && results.length > 0 && (
           <ul className="absolute z-10 left-0 right-0 bg-white border border-gray-200 rounded shadow-lg mt-1 max-h-56 overflow-y-auto">
@@ -93,7 +93,7 @@ export default function VenueCombobox({ defaultName = "", defaultAddress = "", o
           onChange={e => setAddress(e.target.value)}
           required
           placeholder="Full address including city and state"
-          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ED1C24]"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]"
         />
       </div>
     </div>

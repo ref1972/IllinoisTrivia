@@ -27,7 +27,7 @@ function LoginContent() {
 
   return (
     <div className="max-w-sm mx-auto mt-16">
-      <h1 className="text-2xl font-bold text-[#58595B] mb-6 text-center">
+      <h1 className="text-2xl font-bold text-[#0B1C3A] mb-6 text-center">
         Admin Login
       </h1>
 

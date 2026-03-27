@@ -1,3 +1,11 @@
+export interface EventTags {
+  age?: 'AA' | '18' | '21';
+  bar?: 'CB' | 'OB' | 'NA';
+  mulligans?: 'M' | 'NM';
+  auction?: 'LA' | 'SA';
+  fiftyFifty?: '50';
+}
+
 export interface Event {
   id: number;
   name: string;
@@ -16,6 +24,7 @@ export interface Event {
   contact_name: string | null;
   contact_email: string | null;
   contact_phone: string | null;
+  tags: string | null; // JSON-encoded EventTags
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }

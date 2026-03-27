@@ -52,7 +52,7 @@ export default function SubscribeForm() {
 
   return (
     <div className="bg-white rounded-lg border shadow-sm p-6">
-      <h2 className="text-lg font-bold text-[#58595B] mb-1">Get Event Alerts</h2>
+      <h2 className="text-lg font-bold text-[#0B1C3A] mb-1">Get Event Alerts</h2>
       <p className="text-sm text-gray-600 mb-4">
         Subscribe to be notified when new trivia night events are added in your area.
       </p>
@@ -67,12 +67,12 @@ export default function SubscribeForm() {
             onChange={e => setEmail(e.target.value)}
             placeholder="your@email.com"
             required
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#58595B]"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0B1C3A]"
           />
           <select
             value={region}
             onChange={e => setRegion(e.target.value)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#58595B]"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0B1C3A]"
           >
             {IL_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
           </select>
@@ -82,7 +82,7 @@ export default function SubscribeForm() {
           <button
             type="submit"
             disabled={status === "loading"}
-            className="w-full bg-[#ED1C24] text-white py-2 rounded text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            className="w-full bg-[#C83803] text-white py-2 rounded text-sm font-medium hover:bg-orange-800 transition-colors disabled:opacity-50"
           >
             {status === "loading" ? "Subscribing..." : "Subscribe"}
           </button>

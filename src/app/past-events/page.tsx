@@ -23,10 +23,10 @@ export default function PastEventsPage() {
   return (
     <div>
       <div className="mb-8">
-        <Link href="/" className="text-[#ED1C24] hover:underline text-sm mb-4 inline-block">
+        <Link href="/" className="text-[#C83803] hover:underline text-sm mb-4 inline-block">
           &larr; Back to upcoming events
         </Link>
-        <h1 className="text-3xl font-bold text-[#58595B] mb-2">Past Events</h1>
+        <h1 className="text-3xl font-bold text-[#0B1C3A] mb-2">Past Events</h1>
         <p className="text-gray-600">A history of trivia night fundraisers listed on IllinoisTrivia.com.</p>
       </div>
 
@@ -44,7 +44,7 @@ export default function PastEventsPage() {
             >
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
-                  <h2 className="text-xl font-semibold text-[#58595B]">{event.name}</h2>
+                  <h2 className="text-xl font-semibold text-[#0B1C3A]">{event.name}</h2>
                   <p className="text-gray-600 mt-1">{event.venue} &mdash; {event.address}</p>
                 </div>
                 <div className="text-right flex-shrink-0">

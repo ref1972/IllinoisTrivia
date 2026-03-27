@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getEventById, recordPageView } from "@/lib/db";
 import EventActions from "@/components/EventActions";
+import EventTagBadges from "@/components/EventTagBadges";
 
 export const dynamic = "force-dynamic";
 
@@ -100,13 +101,13 @@ export default function EventPage({ params }: { params: { id: string } }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Link href="/" className="text-[#ED1C24] hover:underline text-sm mb-6 inline-block">
+      <Link href="/" className="text-[#C83803] hover:underline text-sm mb-6 inline-block">
         &larr; Back to all events
       </Link>
 
       <div className={`rounded-lg shadow-sm border p-6 sm:p-8 ${event.is_workshop ? "bg-amber-50 border-amber-300" : "bg-white"}`}>
         <div className="flex items-center gap-3 mb-2 flex-wrap">
-          <h1 className="text-3xl font-bold text-[#58595B]">{event.name}</h1>
+          <h1 className="text-3xl font-bold text-[#0B1C3A]">{event.name}</h1>
           {event.is_workshop === 1 && (
             <span className="inline-block bg-amber-500 text-white text-xs font-bold px-2 py-0.5 rounded uppercase tracking-wide">
               Trivia Workshop
@@ -135,8 +136,15 @@ export default function EventPage({ params }: { params: { id: string } }) {
 
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Cost</h3>
-            <p className="text-lg font-medium text-[#ED1C24]">{event.cost}</p>
+            <p className="text-lg font-medium text-[#C83803]">{event.cost}</p>
           </div>
+
+          {event.tags && (
+            <div>
+              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Event Details</h3>
+              <EventTagBadges tags={event.tags} size="md" />
+            </div>
+          )}
 
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Venue</h3>
@@ -145,7 +153,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
               href={googleMapsUrl(event.address)}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#ED1C24] hover:underline inline-flex items-center gap-1"
+              className="text-[#C83803] hover:underline inline-flex items-center gap-1"
             >
               {event.address}
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +168,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
               <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Contact</h3>
               {event.contact_name && <p className="text-gray-800">{event.contact_name}</p>}
               {event.contact_email && (
-                <p><a href={`mailto:${event.contact_email}`} className="text-[#ED1C24] hover:underline">{event.contact_email}</a></p>
+                <p><a href={`mailto:${event.contact_email}`} className="text-[#C83803] hover:underline">{event.contact_email}</a></p>
               )}
               {event.contact_phone && <p className="text-gray-600">{event.contact_phone}</p>}
             </div>
@@ -189,7 +197,7 @@ export default function EventPage({ params }: { params: { id: string } }) {
             )}
             {event.website && (
               <a href={event.website} target="_blank" rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-[#58595B] text-white px-4 py-2 rounded font-medium text-sm hover:bg-gray-700 transition-colors">
+                className="inline-flex items-center gap-1.5 bg-[#0B1C3A] text-white px-4 py-2 rounded font-medium text-sm hover:bg-gray-700 transition-colors">
                 Event Website
               </a>
             )}

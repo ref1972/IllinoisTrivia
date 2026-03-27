@@ -93,7 +93,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
           <button
             onClick={handleDelete}
             disabled={submitting}
-            className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="bg-red-600 text-white px-4 py-2 rounded font-medium hover:bg-orange-800 disabled:opacity-50 transition-colors"
           >
             {submitting ? "Submitting..." : "Yes, Request Deletion"}
           </button>
@@ -119,7 +119,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
           value={form[key]}
           onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
           required={required}
-          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ED1C24]"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]"
         />
       </div>
     );
@@ -138,7 +138,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
             onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
             required
             rows={4}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ED1C24]"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]"
           />
         </div>
         {field("Sponsors", "sponsors")}
@@ -154,7 +154,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
           <button
             type="submit"
             disabled={submitting}
-            className="bg-[#ED1C24] text-white px-5 py-2 rounded font-medium hover:bg-red-700 disabled:opacity-50 transition-colors"
+            className="bg-[#C83803] text-white px-5 py-2 rounded font-medium hover:bg-orange-800 disabled:opacity-50 transition-colors"
           >
             {submitting ? "Submitting..." : "Submit Update Request"}
           </button>
@@ -184,7 +184,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
       <div className="flex gap-3">
         <button
           onClick={() => setMode("edit")}
-          className="bg-[#58595B] text-white px-4 py-2 rounded font-medium hover:bg-gray-700 transition-colors"
+          className="bg-[#0B1C3A] text-white px-4 py-2 rounded font-medium hover:bg-gray-700 transition-colors"
         >
           Request Changes
         </button>
