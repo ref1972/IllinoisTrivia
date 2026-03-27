@@ -79,6 +79,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
       latitude: formData.get("latitude") ? parseFloat(formData.get("latitude") as string) : null,
       longitude: formData.get("longitude") ? parseFloat(formData.get("longitude") as string) : null,
       venue_website: formData.get("venue_website") || null,
+      ...(formData.get("remove_image") ? { image: null } : {}),
     };
 
     try {
@@ -207,7 +208,10 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
                 unoptimized
                 className="rounded border object-cover"
               />
-              <p className="text-xs text-gray-400 mt-1">Current image. Upload a new one to replace it.</p>
+              <div className="flex items-center gap-2 mt-2">
+                <input type="checkbox" id="remove_image" name="remove_image" className="w-4 h-4 text-red-600 border-gray-300 rounded" />
+                <label htmlFor="remove_image" className="text-xs text-red-600 cursor-pointer">Remove current image</label>
+              </div>
             </div>
           )}
           <input

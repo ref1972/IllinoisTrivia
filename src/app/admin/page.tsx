@@ -4,6 +4,7 @@ import { isAdmin } from "@/lib/auth";
 import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests, getEventsWithoutCoords } from "@/lib/db";
 import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest } from "./actions";
 import AdminRegeocode from "@/components/AdminRegeocode";
+import AdminCleanupImages from "@/components/AdminCleanupImages";
 import AdminSignOut from "./AdminSignOut";
 import AdminBulkActions from "./AdminBulkActions";
 import AdminEventRow from "./AdminEventRow";
@@ -27,6 +28,7 @@ export default async function AdminPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-3xl font-bold text-[#0B1C3A]">Admin Dashboard</h1>
         <div className="flex items-center gap-3">
+          <AdminCleanupImages />
           <Link
             href="/admin/venues"
             className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium hover:bg-gray-50 transition-colors"

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { unlink } from 'fs/promises';
 import { isAdmin } from '@/lib/auth';
 import { getEventByIdAdmin, updateEvent } from '@/lib/db';
+import { UPLOAD_DIR } from '@/lib/uploads';
 
 export async function GET(
   _request: NextRequest,
@@ -45,6 +47,15 @@ export async function PATCH(
     }
 
     const body = await request.json();
+
+    // If image is being cleared, delete the file from disk
+    if ('image' in body && body.image === null) {
+      const current = getEventByIdAdmin(id);
+      if (current?.image) {
+        await unlink(`${UPLOAD_DIR}/${current.image}`).catch(() => {});
+      }
+    }
+
     updateEvent(id, body);
     return NextResponse.json({ success: true });
   } catch (err) {

@@ -391,6 +391,11 @@ export function getPendingChangeRequestCount(): number {
   return (db.prepare(`SELECT COUNT(*) as c FROM change_requests WHERE status = 'pending'`).get() as { c: number }).c;
 }
 
+export function getAllEventImageFilenames(): string[] {
+  const rows = db.prepare(`SELECT image FROM events WHERE image IS NOT NULL`).all() as { image: string }[];
+  return rows.map(r => r.image);
+}
+
 export function getEventsWithoutCoords(): Event[] {
   return db.prepare(
     `SELECT * FROM events WHERE status = 'approved' AND (latitude IS NULL OR longitude IS NULL) ORDER BY date_time ASC`
