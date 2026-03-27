@@ -67,7 +67,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
         <h2 className="text-lg font-semibold text-green-800 mb-2">Update Request Submitted</h2>
-        <p className="text-green-700">Your changes have been submitted for review. You'll receive an email once they're approved.</p>
+        <p className="text-green-700">Your changes have been submitted for review. You&apos;ll receive an email once they&apos;re approved.</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export default function ManageForm({ event, token }: { event: Event; token: stri
     return (
       <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
         <h2 className="text-lg font-semibold text-green-800 mb-2">Deletion Request Submitted</h2>
-        <p className="text-green-700">Your deletion request has been submitted. You'll receive an email once it's been processed.</p>
+        <p className="text-green-700">Your deletion request has been submitted. You&apos;ll receive an email once it&apos;s been processed.</p>
       </div>
     );
   }

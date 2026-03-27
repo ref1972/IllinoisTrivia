@@ -7,7 +7,7 @@ import {
   updateEventStatus, updateEvent, getEventByIdAdmin,
   setSetting, isCaptchaEnabled, deleteEvent,
   duplicateEvent, insertEventAdmin,
-  getChangeRequestById, updateChangeRequestStatus, getPendingChangeRequests,
+  getChangeRequestById, updateChangeRequestStatus,
 } from "@/lib/db";
 import { geocodeAddress } from "@/lib/geocode";
 import { notifySubscribers, sendApprovalEmail, sendChangeRequestOutcome } from "@/lib/email";
