@@ -1,16 +1,10 @@
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 import { getSubscribersForRegion } from './db';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'friedewald@gmail.com';
-const FROM_EMAIL = process.env.GMAIL_USER || 'noreply@illinoistrivia.com';
+const FROM_EMAIL = 'Illinois Trivia Nights <noreply@illinoistrivia.com>';
 
 interface EventEmailData {
   name: string;
@@ -24,12 +18,7 @@ interface EventEmailData {
 }
 
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  await transporter.sendMail({
-    from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
-    to,
-    subject,
-    html,
-  });
+  await resend.emails.send({ from: FROM_EMAIL, to, subject, html });
 }
 
 function extractCity(address: string): string {
@@ -49,8 +38,8 @@ export async function notifySubscribers(event: { id: number; name: string; date_
   for (const sub of subscribers) {
     const unsubUrl = `https://illinoistrivia.com/unsubscribe?token=${sub.unsubscribe_token}`;
     try {
-      await transporter.sendMail({
-        from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
+      await resend.emails.send({
+        from: FROM_EMAIL,
         to: sub.email,
         subject: `New Trivia Night Event: ${event.name}`,
         html: `
@@ -91,8 +80,8 @@ export async function sendSubmissionEmails(event: EventEmailData) {
 
   // Send admin notification
   try {
-    await transporter.sendMail({
-      from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
+    await resend.emails.send({
+      from: FROM_EMAIL,
       to: ADMIN_EMAIL,
       subject: `New Event Submission: ${event.name}`,
       html: `
@@ -121,8 +110,8 @@ export async function sendSubmissionEmails(event: EventEmailData) {
   // Send confirmation to submitter (if they provided an email)
   if (event.contact_email) {
     try {
-      await transporter.sendMail({
-        from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
+      await resend.emails.send({
+        from: FROM_EMAIL,
         to: event.contact_email,
         subject: `Event Received: ${event.name}`,
         html: `
@@ -137,7 +126,7 @@ export async function sendSubmissionEmails(event: EventEmailData) {
           </table>
           <p>Your event is pending review and will appear on the site once approved. You'll typically hear back within 24-48 hours.</p>
           <p style="color: #999; font-size: 12px; margin-top: 30px;">
-            &mdash; IllinoisTrivia.com
+            &mdash; Illinois Trivia Nights
           </p>
         `,
       });
