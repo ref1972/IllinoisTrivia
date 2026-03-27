@@ -32,7 +32,7 @@ export default function TagSelector({ defaultTags = {} }: Props) {
         {TAG_GROUPS.map(group => (
           <div key={group.key}>
             <p className="text-xs font-medium text-gray-500 mb-1.5">{group.label}</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 items-center">
               {group.options.map(opt => {
                 const selected = tags[group.key] === opt.value;
                 return (
@@ -50,6 +50,16 @@ export default function TagSelector({ defaultTags = {} }: Props) {
                   </button>
                 );
               })}
+              {tags[group.key] && (
+                <button
+                  type="button"
+                  onClick={() => setTags(prev => ({ ...prev, [group.key]: undefined }))}
+                  className="text-xs text-gray-400 hover:text-red-500 transition-colors ml-1"
+                  title="Clear selection"
+                >
+                  ✕ clear
+                </button>
+              )}
             </div>
           </div>
         ))}

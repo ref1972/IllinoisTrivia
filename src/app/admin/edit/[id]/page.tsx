@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Event, EventTags } from "@/lib/types";
 import TagSelector from "@/components/TagSelector";
+import VenueCombobox from "@/components/VenueCombobox";
 
 export default function AdminEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -75,6 +76,8 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
       contact_phone: formData.get("contact_phone") || null,
       tags: formData.get("tags") || null,
       status: formData.get("status"),
+      latitude: formData.get("latitude") ? parseFloat(formData.get("latitude") as string) : null,
+      longitude: formData.get("longitude") ? parseFloat(formData.get("longitude") as string) : null,
     };
 
     try {
@@ -152,15 +155,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        <div>
-          <label className={labelClass} htmlFor="venue">Venue Name *</label>
-          <input type="text" id="venue" name="venue" required className={inputClass} defaultValue={event.venue} />
-        </div>
-
-        <div>
-          <label className={labelClass} htmlFor="address">Address *</label>
-          <input type="text" id="address" name="address" required className={inputClass} defaultValue={event.address} />
-        </div>
+        <VenueCombobox defaultName={event.venue} defaultAddress={event.address} />
 
         <div>
           <label className={labelClass} htmlFor="description">Description *</label>
@@ -185,6 +180,17 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           <div>
             <label className={labelClass} htmlFor="website">Website</label>
             <input type="url" id="website" name="website" className={inputClass} defaultValue={event.website || ""} />
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label className={labelClass} htmlFor="latitude">Latitude <span className="text-gray-400 font-normal">(manual override)</span></label>
+            <input type="number" step="any" id="latitude" name="latitude" className={inputClass} defaultValue={event.latitude ?? ""} placeholder="e.g. 41.8781" />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="longitude">Longitude <span className="text-gray-400 font-normal">(manual override)</span></label>
+            <input type="number" step="any" id="longitude" name="longitude" className={inputClass} defaultValue={event.longitude ?? ""} placeholder="e.g. -87.6298" />
           </div>
         </div>
 

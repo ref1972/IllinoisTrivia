@@ -3,6 +3,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getEventById, recordPageView } from "@/lib/db";
+import { isAdmin } from "@/lib/auth";
 import EventActions from "@/components/EventActions";
 import EventTagBadges from "@/components/EventTagBadges";
 
@@ -54,12 +55,14 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   };
 }
 
-export default function EventPage({ params }: { params: { id: string } }) {
+export default async function EventPage({ params }: { params: { id: string } }) {
   const id = parseInt(params.id, 10);
   if (isNaN(id)) notFound();
 
   const event = getEventById(id);
   if (!event) notFound();
+
+  const admin = await isAdmin();
 
   // Record page view
   recordPageView(id);
@@ -101,9 +104,16 @@ export default function EventPage({ params }: { params: { id: string } }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <Link href="/" className="text-[#C83803] hover:underline text-sm mb-6 inline-block">
-        &larr; Back to all events
-      </Link>
+      <div className="flex items-center justify-between mb-6">
+        <Link href="/" className="text-[#C83803] hover:underline text-sm inline-block">
+          &larr; Back to all events
+        </Link>
+        {admin && (
+          <Link href={`/admin/edit/${event.id}`} className="bg-[#0B1C3A] text-white text-sm px-3 py-1.5 rounded font-medium hover:bg-gray-700 transition-colors">
+            Edit Event
+          </Link>
+        )}
+      </div>
 
       <div className={`rounded-lg shadow-sm border p-6 sm:p-8 ${event.is_workshop ? "bg-amber-50 border-amber-300" : "bg-white"}`}>
         <div className="flex items-center gap-3 mb-2 flex-wrap">
