@@ -60,7 +60,6 @@ export default function EventList({ events }: { events: Event[] }) {
     }
 
     result.sort((a, b) => {
-      if (a.is_workshop !== b.is_workshop) return b.is_workshop - a.is_workshop;
       if (sort === "name") return a.name.localeCompare(b.name);
       return new Date(a.date_time).getTime() - new Date(b.date_time).getTime();
     });
