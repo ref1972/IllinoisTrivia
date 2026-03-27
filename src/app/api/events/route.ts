@@ -3,8 +3,8 @@ import { insertEvent, isCaptchaEnabled } from '@/lib/db';
 import { verifyRecaptcha } from '@/lib/recaptcha';
 import { sendSubmissionEmails } from '@/lib/email';
 import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import crypto from 'crypto';
+import { UPLOAD_DIR } from '@/lib/uploads';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -54,11 +54,10 @@ export async function POST(request: NextRequest) {
       const ext = imageFile.type.split('/')[1] === 'jpeg' ? 'jpg' : imageFile.type.split('/')[1];
       imageFilename = `${crypto.randomUUID()}.${ext}`;
 
-      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-      await mkdir(uploadDir, { recursive: true });
+      await mkdir(UPLOAD_DIR, { recursive: true });
 
       const buffer = Buffer.from(await imageFile.arrayBuffer());
-      await writeFile(path.join(uploadDir, imageFilename), buffer);
+      await writeFile(`${UPLOAD_DIR}/${imageFilename}`, buffer);
     }
 
     const { id, manage_token } = insertEvent({

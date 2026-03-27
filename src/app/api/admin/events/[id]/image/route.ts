@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAdmin } from '@/lib/auth';
 import { updateEvent } from '@/lib/db';
 import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 import crypto from 'crypto';
+import { UPLOAD_DIR } from '@/lib/uploads';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -41,11 +41,10 @@ export async function POST(
     const ext = imageFile.type.split('/')[1] === 'jpeg' ? 'jpg' : imageFile.type.split('/')[1];
     const filename = `${crypto.randomUUID()}.${ext}`;
 
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await mkdir(uploadDir, { recursive: true });
+    await mkdir(UPLOAD_DIR, { recursive: true });
 
     const buffer = Buffer.from(await imageFile.arrayBuffer());
-    await writeFile(path.join(uploadDir, filename), buffer);
+    await writeFile(`${UPLOAD_DIR}/${filename}`, buffer);
 
     updateEvent(id, { image: filename } as never);
 
