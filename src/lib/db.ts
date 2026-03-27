@@ -111,7 +111,7 @@ export function isCaptchaEnabled(): boolean {
 
 export function getApprovedEvents(): Event[] {
   return db.prepare(
-    `SELECT * FROM events WHERE status = 'approved' AND date_time >= datetime('now') ORDER BY is_workshop DESC, date_time ASC`
+    `SELECT * FROM events WHERE status = 'approved' AND date_time >= datetime('now') ORDER BY date_time ASC`
   ).all() as Event[];
 }
 
