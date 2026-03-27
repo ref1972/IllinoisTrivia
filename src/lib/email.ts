@@ -4,7 +4,7 @@ import { getSubscribersForRegion } from './db';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'friedewald@gmail.com';
-const FROM_EMAIL = 'Illinois Trivia Nights <noreply@illinoistrivia.com>';
+const FROM_EMAIL = 'IllinoisTrivia.com <noreply@illinoistrivia.com>';
 
 interface EventEmailData {
   name: string;
