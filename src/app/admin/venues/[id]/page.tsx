@@ -1,0 +1,58 @@
+import { redirect, notFound } from "next/navigation";
+import { isAdmin } from "@/lib/auth";
+import { getVenueById } from "@/lib/db";
+import { editVenue } from "../actions";
+import Link from "next/link";
+
+export const dynamic = "force-dynamic";
+
+export default async function EditVenuePage({ params }: { params: { id: string } }) {
+  const admin = await isAdmin();
+  if (!admin) redirect("/admin/login");
+
+  const venue = getVenueById(Number(params.id));
+  if (!venue) return notFound();
+
+  const inputClass = "w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#ED1C24]";
+
+  return (
+    <div className="max-w-xl">
+      <Link href="/admin/venues" className="text-sm text-gray-500 hover:text-gray-700 mb-4 block">← Back to Venues</Link>
+      <h1 className="text-2xl font-bold text-[#58595B] mb-6">Edit Venue</h1>
+
+      <form
+        action={async (fd: FormData) => {
+          "use server";
+          await editVenue(venue.id, {
+            name: fd.get("name") as string,
+            address: fd.get("address") as string,
+            website: (fd.get("website") as string) || undefined,
+          });
+          redirect("/admin/venues");
+        }}
+        className="bg-white border rounded-lg p-6 space-y-4"
+      >
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Venue Name *</label>
+          <input name="name" defaultValue={venue.name} required className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+          <input name="address" defaultValue={venue.address} required className={inputClass} />
+        </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
+          <input name="website" type="url" defaultValue={venue.website || ""} className={inputClass} />
+        </div>
+        <div className="flex gap-3 pt-2">
+          <button type="submit" className="bg-[#ED1C24] text-white px-5 py-2 rounded font-medium hover:bg-red-700 transition-colors">
+            Save Changes
+          </button>
+          <Link href="/admin/venues" className="bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium hover:bg-gray-300 transition-colors">
+            Cancel
+          </Link>
+        </div>
+      </form>
+    </div>
+  );
+}

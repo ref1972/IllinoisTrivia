@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import VenueCombobox from "@/components/VenueCombobox";
 
 declare global {
   interface Window {
@@ -137,15 +138,7 @@ export default function SubmitPage() {
           </div>
         </div>
 
-        <div>
-          <label className={labelClass} htmlFor="venue">Venue Name *</label>
-          <input type="text" id="venue" name="venue" required className={inputClass} placeholder="e.g. Elks Lodge #158" />
-        </div>
-
-        <div>
-          <label className={labelClass} htmlFor="address">Address *</label>
-          <input type="text" id="address" name="address" required className={inputClass} placeholder="e.g. 123 Main St, Springfield, IL 62701" />
-        </div>
+        <VenueCombobox />
 
         <div>
           <label className={labelClass} htmlFor="description">Description *</label>

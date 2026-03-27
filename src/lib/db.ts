@@ -63,6 +63,16 @@ db.exec(`
 `);
 
 db.exec(`
+  CREATE TABLE IF NOT EXISTS venues (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL UNIQUE,
+    address TEXT NOT NULL,
+    website TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
+db.exec(`
   CREATE TABLE IF NOT EXISTS change_requests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     event_id INTEGER NOT NULL,
@@ -334,6 +344,45 @@ export function getChangeRequestById(id: number): ChangeRequest | undefined {
 
 export function updateChangeRequestStatus(id: number, status: 'approved' | 'rejected'): void {
   db.prepare(`UPDATE change_requests SET status = ? WHERE id = ?`).run(status, id);
+}
+
+export interface Venue {
+  id: number;
+  name: string;
+  address: string;
+  website: string | null;
+  created_at: string;
+}
+
+export function searchVenues(query: string): Venue[] {
+  return db.prepare(
+    `SELECT * FROM venues WHERE name LIKE ? ORDER BY name ASC LIMIT 10`
+  ).all(`%${query}%`) as Venue[];
+}
+
+export function getAllVenues(): Venue[] {
+  return db.prepare(`SELECT * FROM venues ORDER BY name ASC`).all() as Venue[];
+}
+
+export function upsertVenue(name: string, address: string, website?: string | null): void {
+  db.prepare(`
+    INSERT INTO venues (name, address, website)
+    VALUES (?, ?, ?)
+    ON CONFLICT(name) DO NOTHING
+  `).run(name, address, website || null);
+}
+
+export function updateVenue(id: number, data: { name: string; address: string; website?: string | null }): void {
+  db.prepare(`UPDATE venues SET name = ?, address = ?, website = ? WHERE id = ?`)
+    .run(data.name, data.address, data.website || null, id);
+}
+
+export function deleteVenue(id: number): void {
+  db.prepare(`DELETE FROM venues WHERE id = ?`).run(id);
+}
+
+export function getVenueById(id: number): Venue | undefined {
+  return db.prepare(`SELECT * FROM venues WHERE id = ?`).get(id) as Venue | undefined;
 }
 
 export function getPendingChangeRequestCount(): number {

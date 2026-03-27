@@ -8,6 +8,7 @@ import {
   setSetting, isCaptchaEnabled, deleteEvent,
   duplicateEvent, insertEventAdmin,
   getChangeRequestById, updateChangeRequestStatus,
+  upsertVenue,
 } from "@/lib/db";
 import { geocodeAddress } from "@/lib/geocode";
 import { notifySubscribers, sendApprovalEmail, sendChangeRequestOutcome } from "@/lib/email";
@@ -30,6 +31,7 @@ export async function approveEvent(id: number) {
       const coords = await geocodeAddress(event.address);
       if (coords) updateEvent(id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
     }
+    upsertVenue(event.venue, event.address, event.website);
     notifySubscribers(event).catch(err => console.error("Failed to notify subscribers:", err));
     if (event.contact_email && (event as Event & { manage_token?: string }).manage_token) {
       sendApprovalEmail({
@@ -91,6 +93,7 @@ export async function createEvent(data: Partial<Event>) {
     const coords = await geocodeAddress(data.address);
     if (coords) updateEvent(newId, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
   }
+  if (data.venue && data.address) upsertVenue(data.venue, data.address, data.website);
   revalidateAll(newId);
   redirect(`/admin/edit/${newId}`);
 }
