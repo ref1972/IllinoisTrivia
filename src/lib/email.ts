@@ -1,7 +1,9 @@
 import { Resend } from 'resend';
 import { getSubscribersForRegion } from './db';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+function getResend() {
+  return new Resend(process.env.RESEND_API_KEY);
+}
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'friedewald@gmail.com';
 const FROM_EMAIL = 'IllinoisTrivia.com <noreply@illinoistrivia.com>';
@@ -19,7 +21,7 @@ interface EventEmailData {
 }
 
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
-  await resend.emails.send({ from: FROM_EMAIL, to, subject, html });
+  await getResend().emails.send({ from: FROM_EMAIL, to, subject, html });
 }
 
 function extractCity(address: string): string {
@@ -39,7 +41,7 @@ export async function notifySubscribers(event: { id: number; name: string; date_
   for (const sub of subscribers) {
     const unsubUrl = `https://illinoistrivia.com/unsubscribe?token=${sub.unsubscribe_token}`;
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: FROM_EMAIL,
         to: sub.email,
         subject: `New Trivia Night Event: ${event.name}`,
@@ -81,7 +83,7 @@ export async function sendSubmissionEmails(event: EventEmailData) {
 
   // Send admin notification
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
       subject: `New Event Submission: ${event.name}`,
@@ -111,7 +113,7 @@ export async function sendSubmissionEmails(event: EventEmailData) {
   // Send confirmation to submitter (if they provided an email)
   if (event.contact_email) {
     try {
-      await resend.emails.send({
+      await getResend().emails.send({
         from: FROM_EMAIL,
         to: event.contact_email,
         subject: `Event Received: ${event.name}`,
@@ -140,7 +142,7 @@ export async function sendSubmissionEmails(event: EventEmailData) {
 export async function sendApprovalEmail(event: { name: string; id: number; contact_email: string; manage_token: string }) {
   const manageUrl = `${process.env.NEXTAUTH_URL || 'https://illinoistrivia.com'}/manage/${event.manage_token}`;
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: event.contact_email,
       subject: `Your event has been approved: ${event.name}`,
@@ -166,7 +168,7 @@ export async function sendApprovalEmail(event: { name: string; id: number; conta
 
 export async function sendChangeRequestNotification(event: { name: string; id: number }, type: 'update' | 'delete', changes: Record<string, unknown> | null) {
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: ADMIN_EMAIL,
       subject: `Change Request: ${type === 'delete' ? 'Deletion' : 'Update'} for "${event.name}"`,
@@ -195,7 +197,7 @@ export async function sendChangeRequestNotification(event: { name: string; id: n
 
 export async function sendChangeRequestOutcome(email: string, eventName: string, type: 'update' | 'delete', approved: boolean) {
   try {
-    await resend.emails.send({
+    await getResend().emails.send({
       from: FROM_EMAIL,
       to: email,
       subject: `Your ${type === 'delete' ? 'deletion' : 'update'} request for "${eventName}" was ${approved ? 'approved' : 'rejected'}`,
