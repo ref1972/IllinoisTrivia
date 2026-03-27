@@ -333,6 +333,7 @@ export function getPendingChangeRequests(): (ChangeRequest & { event: Event })[]
       contact_email: r.contact_email as string | null,
       contact_phone: r.contact_phone as string | null,
       tags: r.tags as string | null,
+      venue_website: r.venue_website as string | null,
       status: r.event_status as 'pending' | 'approved' | 'rejected',
       created_at: r.created_at,
     },
