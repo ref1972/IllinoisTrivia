@@ -35,7 +35,11 @@
       "Bash(grep -v \"^$\")",
       "mcp__Claude_Preview__preview_start",
       "Bash(xargs sed:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(pkill -f \"next start\")",
+      "Bash(pkill -f 'next dev')",
+      "Bash(pkill -f 'next start')"
     ]
   }
 }

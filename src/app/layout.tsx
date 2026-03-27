@@ -30,8 +30,8 @@ export default function RootLayout({
             <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
               <Link href="/" className="hover:opacity-80 transition-opacity">
                 <span className="text-2xl font-black leading-tight tracking-tight">
-                  <span className="text-[#0B1C3A]">illinois</span>
-                  <span className="text-[#C83803]">TRIVIA</span>
+                  <span className="text-[#0B1C3A]">Illinois</span>
+                  <span className="text-[#C83803]">Trivia</span>
                   <span className="text-[#0B1C3A]">.com</span>
                 </span>
               </Link>
@@ -63,8 +63,8 @@ export default function RootLayout({
             <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <p>
                 &copy; {new Date().getFullYear()}{" "}
-                <span className="text-white font-semibold">illinois</span>
-                <span className="text-[#C83803] font-black">TRIVIA</span>
+                <span className="text-white font-semibold">Illinois</span>
+                <span className="text-[#C83803] font-black">Trivia</span>
                 <span className="text-white font-semibold">.com</span>
                 {" "}&mdash; Trivia night fundraisers across the Prairie State
               </p>
