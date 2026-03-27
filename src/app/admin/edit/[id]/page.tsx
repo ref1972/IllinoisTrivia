@@ -78,6 +78,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
       status: formData.get("status"),
       latitude: formData.get("latitude") ? parseFloat(formData.get("latitude") as string) : null,
       longitude: formData.get("longitude") ? parseFloat(formData.get("longitude") as string) : null,
+      venue_website: formData.get("venue_website") || null,
     };
 
     try {
@@ -155,7 +156,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        <VenueCombobox defaultName={event.venue} defaultAddress={event.address} />
+        <VenueCombobox defaultName={event.venue} defaultAddress={event.address} defaultWebsite={event.venue_website || ""} />
 
         <div>
           <label className={labelClass} htmlFor="description">Description *</label>

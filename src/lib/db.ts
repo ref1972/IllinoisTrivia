@@ -91,7 +91,7 @@ if (!captchaSetting) {
 }
 
 // Add columns if missing (existing databases)
-const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT', 'tags TEXT'];
+const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT', 'tags TEXT', 'venue_website TEXT'];
 for (const col of columnsToAdd) {
   try { db.exec(`ALTER TABLE events ADD COLUMN ${col}`); } catch { /* already exists */ }
 }
@@ -146,14 +146,14 @@ export function getAllEvents(): Event[] {
 export function insertEvent(data: EventFormData): { id: number; manage_token: string } {
   const manage_token = crypto.randomBytes(32).toString('hex');
   const result = db.prepare(`
-    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, manage_token, tags)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, manage_token, tags, venue_website)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.name, data.date_time, data.venue, data.address, data.cost,
     data.description, data.sponsors || null, data.facebook_url || null,
     data.website || null, data.image || null,
     data.contact_name || '', data.contact_email || '', data.contact_phone || null,
-    manage_token, data.tags || null
+    manage_token, data.tags || null, data.venue_website || null
   );
   return { id: Number(result.lastInsertRowid), manage_token };
 }
@@ -198,7 +198,7 @@ export function updateEvent(id: number, data: Partial<Event>): void {
   const allowed = [
     'name', 'date_time', 'venue', 'address', 'cost', 'description',
     'sponsors', 'facebook_url', 'website', 'image', 'latitude', 'longitude',
-    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status', 'tags'
+    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status', 'tags', 'venue_website'
   ] as const;
 
   const notNullFields = new Set(['contact_name', 'contact_email']);

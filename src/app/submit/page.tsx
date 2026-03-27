@@ -63,6 +63,7 @@ export default function SubmitPage() {
       if (formData.get("contact_email")) submitData.append("contact_email", formData.get("contact_email") as string);
       if (formData.get("contact_phone")) submitData.append("contact_phone", formData.get("contact_phone") as string);
       if (formData.get("tags")) submitData.append("tags", formData.get("tags") as string);
+      if (formData.get("venue_website")) submitData.append("venue_website", formData.get("venue_website") as string);
       submitData.append("recaptchaToken", recaptchaToken);
 
       const imageFile = formData.get("image") as File | null;

@@ -25,6 +25,7 @@ export interface Event {
   contact_email: string | null;
   contact_phone: string | null;
   tags: string | null; // JSON-encoded EventTags
+  venue_website: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }

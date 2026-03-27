@@ -12,12 +12,14 @@ interface Venue {
 interface Props {
   defaultName?: string;
   defaultAddress?: string;
+  defaultWebsite?: string;
   onSelect?: (venue: Venue) => void;
 }
 
-export default function VenueCombobox({ defaultName = "", defaultAddress = "", onSelect }: Props) {
+export default function VenueCombobox({ defaultName = "", defaultAddress = "", defaultWebsite = "", onSelect }: Props) {
   const [name, setName] = useState(defaultName);
   const [address, setAddress] = useState(defaultAddress);
+  const [website, setWebsite] = useState(defaultWebsite);
   const [results, setResults] = useState<Venue[]>([]);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -46,6 +48,7 @@ export default function VenueCombobox({ defaultName = "", defaultAddress = "", o
   function select(venue: Venue) {
     setName(venue.name);
     setAddress(venue.address);
+    setWebsite(venue.website ?? "");
     setOpen(false);
     onSelect?.(venue);
   }
@@ -93,6 +96,18 @@ export default function VenueCombobox({ defaultName = "", defaultAddress = "", o
           onChange={e => setAddress(e.target.value)}
           required
           placeholder="Full address including city and state"
+          className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]"
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Venue Website</label>
+        <input
+          type="url"
+          name="venue_website"
+          value={website}
+          onChange={e => setWebsite(e.target.value)}
+          placeholder="https://..."
           className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#C83803]"
         />
       </div>

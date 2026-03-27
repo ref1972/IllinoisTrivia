@@ -76,6 +76,7 @@ export async function POST(request: NextRequest) {
       contact_phone: (formData.get('contact_phone') as string)?.trim() || null,
       image: imageFilename,
       tags: (formData.get('tags') as string)?.trim() || null,
+      venue_website: (formData.get('venue_website') as string)?.trim() || null,
     });
 
     // Send notification emails (don't block the response)
