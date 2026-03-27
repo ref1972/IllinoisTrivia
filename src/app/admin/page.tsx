@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests, getEventsWithoutCoords } from "@/lib/db";
-import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest, regeocodeMissingEvents } from "./actions";
+import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest } from "./actions";
+import AdminRegeocode from "@/components/AdminRegeocode";
 import AdminSignOut from "./AdminSignOut";
 import AdminBulkActions from "./AdminBulkActions";
 import AdminEventRow from "./AdminEventRow";
@@ -88,11 +89,7 @@ export default async function AdminPage() {
                 {missingCoordsEvents.map(e => e.name).join(", ")}
               </p>
             </div>
-            <form action={async () => { "use server"; await regeocodeMissingEvents(); }}>
-              <button type="submit" className="bg-yellow-600 text-white px-4 py-2 rounded text-sm font-medium hover:bg-yellow-700 transition-colors whitespace-nowrap ml-4">
-                Fix Now
-              </button>
-            </form>
+            <AdminRegeocode count={missingCoordsEvents.length} />
           </div>
         </section>
       )}
