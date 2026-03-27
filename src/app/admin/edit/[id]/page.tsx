@@ -204,6 +204,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
                 alt="Current event graphic"
                 width={300}
                 height={150}
+                unoptimized
                 className="rounded border object-cover"
               />
               <p className="text-xs text-gray-400 mt-1">Current image. Upload a new one to replace it.</p>

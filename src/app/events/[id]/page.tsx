@@ -132,6 +132,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
               alt={event.name}
               width={800}
               height={400}
+              unoptimized
               className="rounded-lg w-full max-h-96 object-cover"
             />
           </div>
