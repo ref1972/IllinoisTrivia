@@ -39,7 +39,9 @@
       "Bash(curl -s http://localhost:3000)",
       "Bash(pkill -f \"next start\")",
       "Bash(pkill -f 'next dev')",
-      "Bash(pkill -f 'next start')"
+      "Bash(pkill -f 'next start')",
+      "Skill(update-config)",
+      "Skill(update-config:*)"
     ]
   }
 }

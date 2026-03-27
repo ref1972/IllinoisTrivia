@@ -8,6 +8,10 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "IllinoisTrivia.com",
   description: "Find trivia night fundraising events across Illinois",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
   openGraph: {
     siteName: "IllinoisTrivia.com",
     type: "website",
