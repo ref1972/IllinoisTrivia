@@ -15,6 +15,7 @@ interface EventEmailData {
   description: string;
   contact_name?: string | null;
   contact_email?: string | null;
+  manage_token?: string | null;
 }
 
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
@@ -133,5 +134,80 @@ export async function sendSubmissionEmails(event: EventEmailData) {
     } catch (err) {
       console.error('Failed to send submitter confirmation email:', err);
     }
+  }
+}
+
+export async function sendApprovalEmail(event: { name: string; id: number; contact_email: string; manage_token: string }) {
+  const manageUrl = `${process.env.NEXTAUTH_URL || 'https://illinoistrivia.com'}/manage/${event.manage_token}`;
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: event.contact_email,
+      subject: `Your event has been approved: ${event.name}`,
+      html: `
+        <h2>Your Event is Live!</h2>
+        <p>Your trivia night event <strong>${event.name}</strong> has been approved and is now listed on <a href="https://illinoistrivia.com">IllinoisTrivia.com</a>.</p>
+        <p style="margin-top: 20px;">
+          <a href="https://illinoistrivia.com/events/${event.id}" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+            View Your Event
+          </a>
+        </p>
+        <p style="margin-top: 24px;">Need to make changes or remove the listing? Use your private management link:</p>
+        <p>
+          <a href="${manageUrl}" style="color: #ED1C24;">${manageUrl}</a>
+        </p>
+        <p style="color: #999; font-size: 12px; margin-top: 16px;">Keep this link private — anyone with it can request changes to your event.</p>
+      `,
+    });
+  } catch (err) {
+    console.error('Failed to send approval email:', err);
+  }
+}
+
+export async function sendChangeRequestNotification(event: { name: string; id: number }, type: 'update' | 'delete', changes: Record<string, unknown> | null) {
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `Change Request: ${type === 'delete' ? 'Deletion' : 'Update'} for "${event.name}"`,
+      html: `
+        <h2>Event ${type === 'delete' ? 'Deletion' : 'Update'} Request</h2>
+        <p>The submitter of <strong>${event.name}</strong> has requested a ${type === 'delete' ? 'deletion' : 'change'} to their event.</p>
+        ${type === 'update' && changes ? `
+          <h3>Requested Changes:</h3>
+          <table style="border-collapse: collapse; margin: 16px 0;">
+            ${Object.entries(changes).map(([key, val]) =>
+              `<tr><td style="padding: 6px 12px; font-weight: bold; color: #58595B;">${key}</td><td style="padding: 6px 12px;">${val}</td></tr>`
+            ).join('')}
+          </table>
+        ` : '<p>The submitter has requested this event be deleted.</p>'}
+        <p style="margin-top: 20px;">
+          <a href="${process.env.NEXTAUTH_URL || 'https://illinoistrivia.com'}/admin" style="background-color: #ED1C24; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+            Review in Admin Dashboard
+          </a>
+        </p>
+      `,
+    });
+  } catch (err) {
+    console.error('Failed to send change request notification:', err);
+  }
+}
+
+export async function sendChangeRequestOutcome(email: string, eventName: string, type: 'update' | 'delete', approved: boolean) {
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: email,
+      subject: `Your ${type === 'delete' ? 'deletion' : 'update'} request for "${eventName}" was ${approved ? 'approved' : 'rejected'}`,
+      html: `
+        <h2>Request ${approved ? 'Approved' : 'Rejected'}</h2>
+        <p>Your ${type === 'delete' ? 'deletion' : 'update'} request for <strong>${eventName}</strong> has been <strong>${approved ? 'approved' : 'rejected'}</strong>.</p>
+        ${!approved ? '<p>If you have questions, please <a href="https://illinoistrivia.com/contact">contact us</a>.</p>' : ''}
+        ${approved && type !== 'delete' ? `<p><a href="https://illinoistrivia.com">View the updated listing on IllinoisTrivia.com</a></p>` : ''}
+        <p style="color: #999; font-size: 12px; margin-top: 30px;">&mdash; IllinoisTrivia.com</p>
+      `,
+    });
+  } catch (err) {
+    console.error('Failed to send change request outcome email:', err);
   }
 }

@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git --version)",
+      "Bash(git config:*)",
+      "Bash(gh auth:*)",
+      "Read(//Users/russellefriedewald/**)",
+      "Read(//Users/russellefriedewald/.ssh/**)",
+      "Bash(mkdir -p ~/.ssh)",
+      "Bash(ssh-keygen -t ed25519 -C \"friedewald@gmail.com\" -f ~/.ssh/id_ed25519 -N \"\")",
+      "Bash(ssh -T git@github.com)",
+      "Bash(git init:*)",
+      "Bash(git remote:*)",
+      "Bash(git fetch:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(npm install:*)",
+      "Bash(npm --version)",
+      "Read(//opt/homebrew/bin/**)",
+      "Read(//usr/local/bin/**)",
+      "Read(//opt/**)",
+      "Read(//usr/local/Homebrew/**)",
+      "Bash(ls /opt/homebrew/bin/node* /opt/homebrew/opt/node*/bin/node)",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(ls /Users/russellefriedewald/Desktop/IllinoisTrivia/.env*)",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(find /Users/russellefriedewald/Desktop/IllinoisTrivia -not -path */node_modules/* -not -path */.next/* -not -path */.git/* -type f -o -type d)",
+      "Bash(node -e \":*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(node -e \"require\\(''''./src/lib/email.ts''''\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(grep -v \"^$\")"
+    ]
+  }
+}

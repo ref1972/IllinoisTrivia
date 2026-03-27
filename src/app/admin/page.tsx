@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
-import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts } from "@/lib/db";
-import { approveEvent, rejectEvent, toggleCaptcha } from "./actions";
+import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests } from "@/lib/db";
+import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest } from "./actions";
 import AdminSignOut from "./AdminSignOut";
 import AdminBulkActions from "./AdminBulkActions";
 import AdminEventRow from "./AdminEventRow";
@@ -18,6 +18,7 @@ export default async function AdminPage() {
   const captchaOn = isCaptchaEnabled();
   const stats = getTotalStats();
   const viewCounts = getEventViewCounts();
+  const changeRequests = getPendingChangeRequests();
 
   return (
     <div>
@@ -114,6 +115,70 @@ export default async function AdminPage() {
               </div>
             ))}
           </AdminBulkActions>
+        )}
+      </section>
+
+      {/* Change Requests */}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold text-[#58595B] mb-4">
+          Change Requests ({changeRequests.length})
+        </h2>
+        {changeRequests.length === 0 ? (
+          <p className="text-gray-500 bg-white rounded-lg border p-4">No pending change requests.</p>
+        ) : (
+          <div className="space-y-4">
+            {changeRequests.map((req) => {
+              const changes = req.changes ? JSON.parse(req.changes) as Record<string, string> : null;
+              return (
+                <div key={req.id} className="bg-white rounded-lg shadow-sm border p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="text-lg font-semibold text-gray-800">{req.event.name}</h3>
+                        <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${req.type === 'delete' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}>
+                          {req.type === 'delete' ? 'Deletion Request' : 'Update Request'}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-500 mb-3">
+                        Submitted {new Date(req.created_at).toLocaleString()} &bull; Contact: {req.event.contact_email || 'none'}
+                      </p>
+                      {req.type === 'update' && changes && (
+                        <div className="bg-gray-50 rounded p-3 text-sm space-y-1">
+                          <p className="font-medium text-gray-700 mb-2">Requested changes:</p>
+                          {Object.entries(changes).map(([key, val]) => {
+                            const current = req.event[key as keyof typeof req.event];
+                            const changed = String(current ?? '') !== String(val ?? '');
+                            return changed ? (
+                              <div key={key} className="grid grid-cols-[120px_1fr_1fr] gap-2 text-xs">
+                                <span className="font-medium text-gray-500">{key}</span>
+                                <span className="text-gray-400 line-through">{String(current ?? '—')}</span>
+                                <span className="text-green-700 font-medium">{String(val ?? '—')}</span>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      )}
+                      {req.type === 'delete' && (
+                        <p className="text-sm text-red-600">The submitter is requesting this event be removed from the site.</p>
+                      )}
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <form action={async () => { "use server"; await approveChangeRequest(req.id); }}>
+                        <button type="submit" className="bg-green-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                          Approve
+                        </button>
+                      </form>
+                      <form action={async () => { "use server"; await rejectChangeRequest(req.id); }}>
+                        <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-red-700 transition-colors">
+                          Reject
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
       </section>
 

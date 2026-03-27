@@ -1,6 +1,7 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { Event, EventFormData } from './types';
 
 const dataDir = path.join(process.cwd(), 'data');
@@ -61,6 +62,18 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS change_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_id INTEGER NOT NULL,
+    type TEXT NOT NULL CHECK(type IN ('update', 'delete')),
+    changes TEXT,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (event_id) REFERENCES events(id)
+  )
+`);
+
 // Initialize defaults
 const captchaSetting = db.prepare(`SELECT value FROM settings WHERE key = 'captcha_enabled'`).get();
 if (!captchaSetting) {
@@ -68,7 +81,7 @@ if (!captchaSetting) {
 }
 
 // Add columns if missing (existing databases)
-const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL'];
+const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT'];
 for (const col of columnsToAdd) {
   try { db.exec(`ALTER TABLE events ADD COLUMN ${col}`); } catch { /* already exists */ }
 }
@@ -120,17 +133,19 @@ export function getAllEvents(): Event[] {
   ).all() as Event[];
 }
 
-export function insertEvent(data: EventFormData): number {
+export function insertEvent(data: EventFormData): { id: number; manage_token: string } {
+  const manage_token = crypto.randomBytes(32).toString('hex');
   const result = db.prepare(`
-    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, manage_token)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.name, data.date_time, data.venue, data.address, data.cost,
     data.description, data.sponsors || null, data.facebook_url || null,
     data.website || null, data.image || null,
-    data.contact_name || '', data.contact_email || '', data.contact_phone || null
+    data.contact_name || '', data.contact_email || '', data.contact_phone || null,
+    manage_token
   );
-  return Number(result.lastInsertRowid);
+  return { id: Number(result.lastInsertRowid), manage_token };
 }
 
 export function insertEventAdmin(data: Partial<Event>): number {
@@ -250,6 +265,79 @@ export function getTopEvents(limit = 10): { event: Event; views: number }[] {
     LIMIT ?
   `).all(limit) as (Event & { view_count: number })[];
   return rows.map(r => ({ event: r, views: r.view_count }));
+}
+
+export interface ChangeRequest {
+  id: number;
+  event_id: number;
+  type: 'update' | 'delete';
+  changes: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+export function getEventByManageToken(token: string): Event | undefined {
+  return db.prepare(`SELECT * FROM events WHERE manage_token = ?`).get(token) as Event | undefined;
+}
+
+export function insertChangeRequest(eventId: number, type: 'update' | 'delete', changes: object | null): number {
+  const result = db.prepare(`
+    INSERT INTO change_requests (event_id, type, changes) VALUES (?, ?, ?)
+  `).run(eventId, type, changes ? JSON.stringify(changes) : null);
+  return Number(result.lastInsertRowid);
+}
+
+export function getPendingChangeRequests(): (ChangeRequest & { event: Event })[] {
+  const rows = db.prepare(`
+    SELECT cr.*, e.name as event_name, e.date_time, e.venue, e.address, e.cost,
+           e.description, e.sponsors, e.facebook_url, e.website, e.image,
+           e.contact_name, e.contact_email, e.contact_phone, e.is_workshop, e.status as event_status
+    FROM change_requests cr
+    JOIN events e ON cr.event_id = e.id
+    WHERE cr.status = 'pending'
+    ORDER BY cr.created_at DESC
+  `).all() as (ChangeRequest & Record<string, unknown>)[];
+  return rows.map(r => ({
+    id: r.id,
+    event_id: r.event_id,
+    type: r.type,
+    changes: r.changes,
+    status: r.status,
+    created_at: r.created_at,
+    event: {
+      id: r.event_id,
+      name: r.event_name as string,
+      date_time: r.date_time as string,
+      venue: r.venue as string,
+      address: r.address as string,
+      cost: r.cost as string,
+      description: r.description as string,
+      sponsors: r.sponsors as string | null,
+      facebook_url: r.facebook_url as string | null,
+      website: r.website as string | null,
+      image: r.image as string | null,
+      latitude: null,
+      longitude: null,
+      is_workshop: r.is_workshop as number,
+      contact_name: r.contact_name as string | null,
+      contact_email: r.contact_email as string | null,
+      contact_phone: r.contact_phone as string | null,
+      status: r.event_status as 'pending' | 'approved' | 'rejected',
+      created_at: r.created_at,
+    },
+  }));
+}
+
+export function getChangeRequestById(id: number): ChangeRequest | undefined {
+  return db.prepare(`SELECT * FROM change_requests WHERE id = ?`).get(id) as ChangeRequest | undefined;
+}
+
+export function updateChangeRequestStatus(id: number, status: 'approved' | 'rejected'): void {
+  db.prepare(`UPDATE change_requests SET status = ? WHERE id = ?`).run(status, id);
+}
+
+export function getPendingChangeRequestCount(): number {
+  return (db.prepare(`SELECT COUNT(*) as c FROM change_requests WHERE status = 'pending'`).get() as { c: number }).c;
 }
 
 export function getTotalStats(): { total: number; approved: number; pending: number; totalViews: number } {

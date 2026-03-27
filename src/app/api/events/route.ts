@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       await writeFile(path.join(uploadDir, imageFilename), buffer);
     }
 
-    const id = insertEvent({
+    const { id, manage_token } = insertEvent({
       name: (formData.get('name') as string).trim(),
       date_time: formData.get('date_time') as string,
       venue: (formData.get('venue') as string).trim(),
@@ -87,6 +87,7 @@ export async function POST(request: NextRequest) {
       description: (formData.get('description') as string).trim(),
       contact_name: (formData.get('contact_name') as string)?.trim() || null,
       contact_email: contactEmail,
+      manage_token,
     }).catch((err) => console.error('Email send error:', err));
 
     return NextResponse.json({ success: true, id }, { status: 201 });
