@@ -160,14 +160,14 @@ export function insertEvent(data: EventFormData): { id: number; manage_token: st
 
 export function insertEventAdmin(data: Partial<Event>): number {
   const result = db.prepare(`
-    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, is_workshop, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, is_workshop, status, tags)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.name, data.date_time, data.venue, data.address, data.cost,
     data.description, data.sponsors || null, data.facebook_url || null,
     data.website || null, data.image || null,
     data.contact_name || '', data.contact_email || '', data.contact_phone || null,
-    data.is_workshop ?? 0, data.status ?? 'approved'
+    data.is_workshop ?? 0, data.status ?? 'approved', data.tags || null
   );
   return Number(result.lastInsertRowid);
 }
@@ -198,7 +198,7 @@ export function updateEvent(id: number, data: Partial<Event>): void {
   const allowed = [
     'name', 'date_time', 'venue', 'address', 'cost', 'description',
     'sponsors', 'facebook_url', 'website', 'image', 'latitude', 'longitude',
-    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status'
+    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status', 'tags'
   ] as const;
 
   const notNullFields = new Set(['contact_name', 'contact_email']);

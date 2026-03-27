@@ -152,6 +152,8 @@ export async function regeocodeMissingEvents() {
   for (const event of events) {
     const coords = await geocodeAddress(event.address);
     if (coords) updateEvent(event.id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
+    // Nominatim rate limit: 1 request/second
+    await new Promise(resolve => setTimeout(resolve, 1100));
   }
   revalidateAll();
   return events.length;
