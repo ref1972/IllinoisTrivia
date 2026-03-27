@@ -25,7 +25,7 @@ interface EventEmailData {
 
 export async function sendEmail({ to, subject, html }: { to: string; subject: string; html: string }) {
   await transporter.sendMail({
-    from: `"IllinoisTrivia.com" <${FROM_EMAIL}>`,
+    from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
     to,
     subject,
     html,
@@ -50,7 +50,7 @@ export async function notifySubscribers(event: { id: number; name: string; date_
     const unsubUrl = `https://illinoistrivia.com/unsubscribe?token=${sub.unsubscribe_token}`;
     try {
       await transporter.sendMail({
-        from: `"IllinoisTrivia.com" <${FROM_EMAIL}>`,
+        from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
         to: sub.email,
         subject: `New Trivia Night Event: ${event.name}`,
         html: `
@@ -92,7 +92,7 @@ export async function sendSubmissionEmails(event: EventEmailData) {
   // Send admin notification
   try {
     await transporter.sendMail({
-      from: `"IllinoisTrivia.com" <${FROM_EMAIL}>`,
+      from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
       to: ADMIN_EMAIL,
       subject: `New Event Submission: ${event.name}`,
       html: `
@@ -122,7 +122,7 @@ export async function sendSubmissionEmails(event: EventEmailData) {
   if (event.contact_email) {
     try {
       await transporter.sendMail({
-        from: `"IllinoisTrivia.com" <${FROM_EMAIL}>`,
+        from: `"Illinois Trivia Nights" <${FROM_EMAIL}>`,
         to: event.contact_email,
         subject: `Event Received: ${event.name}`,
         html: `
