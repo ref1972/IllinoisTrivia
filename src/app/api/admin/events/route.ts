@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
-import { insertEventAdmin } from "@/lib/db";
+import { insertEventAdmin, updateEvent, upsertVenue } from "@/lib/db";
 import { geocodeAddress } from "@/lib/geocode";
-import { updateEvent } from "@/lib/db";
 import { Event } from "@/lib/types";
 
 export async function POST(request: NextRequest) {
@@ -16,6 +15,9 @@ export async function POST(request: NextRequest) {
     if (body.address) {
       const coords = await geocodeAddress(body.address);
       if (coords) updateEvent(id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
+    }
+    if (body.venue && body.address) {
+      upsertVenue(body.venue as string, body.address as string, (body.venue_website as string | null) ?? null);
     }
 
     return NextResponse.json({ success: true, id });

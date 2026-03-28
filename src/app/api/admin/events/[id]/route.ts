@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unlink } from 'fs/promises';
 import { isAdmin } from '@/lib/auth';
-import { getEventByIdAdmin, updateEvent } from '@/lib/db';
+import { getEventByIdAdmin, updateEvent, upsertVenue } from '@/lib/db';
 import { UPLOAD_DIR } from '@/lib/uploads';
 
 export async function GET(
@@ -57,6 +57,9 @@ export async function PATCH(
     }
 
     updateEvent(id, body);
+    if (body.venue && body.address) {
+      upsertVenue(body.venue as string, body.address as string, (body.venue_website as string | null) ?? null);
+    }
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('Admin PATCH event error:', err);
