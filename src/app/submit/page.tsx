@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import VenueCombobox from "@/components/VenueCombobox";
 import TagSelector from "@/components/TagSelector";
+import RichTextEditor from "@/components/RichTextEditor";
 
 declare global {
   interface Window {
@@ -144,8 +145,12 @@ export default function SubmitPage() {
         <VenueCombobox />
 
         <div>
-          <label className={labelClass} htmlFor="description">Description *</label>
-          <textarea id="description" name="description" required rows={4} className={inputClass} placeholder="Tell people about your event, the cause, prizes, team sizes, etc." />
+          <label className={labelClass}>Description *</label>
+          <RichTextEditor
+            name="description"
+            required
+            placeholder="Tell people about your event, the cause, prizes, team sizes, etc."
+          />
         </div>
 
         <div>

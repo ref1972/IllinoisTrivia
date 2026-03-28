@@ -9,6 +9,14 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tailwindcss/typography": "^0.5.19",
+    "@tiptap/extension-bullet-list": "^3.21.0",
+    "@tiptap/extension-list-item": "^3.21.0",
+    "@tiptap/extension-ordered-list": "^3.21.0",
+    "@tiptap/extension-underline": "^3.21.0",
+    "@tiptap/pm": "^3.21.0",
+    "@tiptap/react": "^3.21.0",
+    "@tiptap/starter-kit": "^3.21.0",
     "better-sqlite3": "^12.8.0",
     "leaflet": "^1.9.4",
     "next": "14.2.35",

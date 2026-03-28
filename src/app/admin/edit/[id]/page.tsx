@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Event, EventTags } from "@/lib/types";
 import TagSelector from "@/components/TagSelector";
 import VenueCombobox from "@/components/VenueCombobox";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function AdminEditPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -160,8 +161,12 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
         <VenueCombobox defaultName={event.venue} defaultAddress={event.address} defaultWebsite={event.venue_website || ""} />
 
         <div>
-          <label className={labelClass} htmlFor="description">Description *</label>
-          <textarea id="description" name="description" required rows={4} className={inputClass} defaultValue={event.description} />
+          <label className={labelClass}>Description *</label>
+          <RichTextEditor
+            name="description"
+            required
+            defaultValue={event.description}
+          />
         </div>
 
         <div>

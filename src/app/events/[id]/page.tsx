@@ -195,7 +195,10 @@ export default async function EventPage({ params }: { params: { id: string } }) 
 
         <div className="mt-6">
           <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">About This Event</h3>
-          <div className="text-gray-700 leading-relaxed whitespace-pre-wrap">{event.description}</div>
+          <div
+            className="text-gray-700 leading-relaxed prose prose-sm max-w-none"
+            dangerouslySetInnerHTML={{ __html: event.description }}
+          />
         </div>
 
         {(event.facebook_url || event.website) && (
