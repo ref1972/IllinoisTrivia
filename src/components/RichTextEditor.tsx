@@ -3,7 +3,7 @@
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 interface RichTextEditorProps {
   name: string;
@@ -45,6 +45,9 @@ export default function RichTextEditor({
   placeholder = "Enter description...",
   required = false,
 }: RichTextEditorProps) {
+  const [html, setHtml] = useState(defaultValue);
+  const [isEmpty, setIsEmpty] = useState(!defaultValue);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -57,15 +60,17 @@ export default function RichTextEditor({
           "min-h-[120px] px-3 py-2 focus:outline-none prose prose-sm max-w-none",
       },
     },
+    onUpdate({ editor }) {
+      setHtml(editor.getHTML());
+      setIsEmpty(editor.isEmpty);
+    },
   });
-
-  // Keep hidden input in sync
-  const html = editor?.getHTML() ?? "";
-  const isEmpty = editor?.isEmpty ?? true;
 
   useEffect(() => {
     if (defaultValue && editor && editor.isEmpty) {
       editor.commands.setContent(defaultValue);
+      setHtml(defaultValue);
+      setIsEmpty(false);
     }
   }, [defaultValue, editor]);
 
