@@ -166,5 +166,8 @@ export async function saveEvent(id: number, data: Partial<Event>) {
     const coords = await geocodeAddress(data.address);
     if (coords) updateEvent(id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
   }
+  if (data.venue && data.address) {
+    upsertVenue(data.venue, data.address, data.venue_website ?? null);
+  }
   revalidateAll(id);
 }
