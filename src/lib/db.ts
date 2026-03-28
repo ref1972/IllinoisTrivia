@@ -155,6 +155,10 @@ export function insertEvent(data: EventFormData): { id: number; manage_token: st
     data.contact_name || '', data.contact_email || '', data.contact_phone || null,
     manage_token, data.tags || null, data.venue_website || null
   );
+  // Auto-add venue to venues table if not already present
+  if (data.venue && data.address) {
+    upsertVenue(data.venue, data.address, data.venue_website || null);
+  }
   return { id: Number(result.lastInsertRowid), manage_token };
 }
 
@@ -169,6 +173,10 @@ export function insertEventAdmin(data: Partial<Event>): number {
     data.contact_name || '', data.contact_email || '', data.contact_phone || null,
     data.is_workshop ?? 0, data.status ?? 'approved', data.tags || null
   );
+  // Auto-add venue to venues table if not already present
+  if (data.venue && data.address) {
+    upsertVenue(data.venue, data.address, data.venue_website || null);
+  }
   return Number(result.lastInsertRowid);
 }
 
