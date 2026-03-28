@@ -49,6 +49,7 @@ export default function RichTextEditor({
   const [isEmpty, setIsEmpty] = useState(!defaultValue);
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Underline,
