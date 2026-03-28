@@ -76,6 +76,9 @@ export async function POST(request: NextRequest) {
       image: imageFilename,
       tags: (formData.get('tags') as string)?.trim() || null,
       venue_website: (formData.get('venue_website') as string)?.trim() || null,
+      questions_by: (formData.get('questions_by') as string)?.trim() || null,
+      emcee: (formData.get('emcee') as string)?.trim() || null,
+      theme: (formData.get('theme') as string)?.trim() || null,
     });
 
     // Send notification emails (don't block the response)

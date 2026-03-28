@@ -65,6 +65,9 @@ export default function SubmitPage() {
       if (formData.get("contact_phone")) submitData.append("contact_phone", formData.get("contact_phone") as string);
       if (formData.get("tags")) submitData.append("tags", formData.get("tags") as string);
       if (formData.get("venue_website")) submitData.append("venue_website", formData.get("venue_website") as string);
+      if (formData.get("questions_by")) submitData.append("questions_by", formData.get("questions_by") as string);
+      if (formData.get("emcee")) submitData.append("emcee", formData.get("emcee") as string);
+      if (formData.get("theme")) submitData.append("theme", formData.get("theme") as string);
       submitData.append("recaptchaToken", recaptchaToken);
 
       const imageFile = formData.get("image") as File | null;
@@ -161,6 +164,21 @@ export default function SubmitPage() {
         <div>
           <label className={labelClass} htmlFor="sponsors">Presenting Sponsors</label>
           <input type="text" id="sponsors" name="sponsors" className={inputClass} placeholder="e.g. Local Business Name, Another Sponsor" />
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label className={labelClass} htmlFor="questions_by">Questions Written By</label>
+            <input type="text" id="questions_by" name="questions_by" className={inputClass} placeholder="e.g. John Smith" />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="emcee">Emcee</label>
+            <input type="text" id="emcee" name="emcee" className={inputClass} placeholder="e.g. Jane Doe" />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="theme">Theme</label>
+            <input type="text" id="theme" name="theme" className={inputClass} placeholder="e.g. 80s Pop Culture" />
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">

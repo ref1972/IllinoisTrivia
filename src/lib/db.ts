@@ -91,7 +91,7 @@ if (!captchaSetting) {
 }
 
 // Add columns if missing (existing databases)
-const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT', 'tags TEXT', 'venue_website TEXT'];
+const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT', 'tags TEXT', 'venue_website TEXT', 'questions_by TEXT', 'emcee TEXT', 'theme TEXT'];
 for (const col of columnsToAdd) {
   try { db.exec(`ALTER TABLE events ADD COLUMN ${col}`); } catch { /* already exists */ }
 }
@@ -146,14 +146,15 @@ export function getAllEvents(): Event[] {
 export function insertEvent(data: EventFormData): { id: number; manage_token: string } {
   const manage_token = crypto.randomBytes(32).toString('hex');
   const result = db.prepare(`
-    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, manage_token, tags, venue_website)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO events (name, date_time, venue, address, cost, description, sponsors, facebook_url, website, image, contact_name, contact_email, contact_phone, manage_token, tags, venue_website, questions_by, emcee, theme)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     data.name, data.date_time, data.venue, data.address, data.cost,
     data.description, data.sponsors || null, data.facebook_url || null,
     data.website || null, data.image || null,
     data.contact_name || '', data.contact_email || '', data.contact_phone || null,
-    manage_token, data.tags || null, data.venue_website || null
+    manage_token, data.tags || null, data.venue_website || null,
+    data.questions_by || null, data.emcee || null, data.theme || null
   );
   // Auto-add venue to venues table if not already present
   if (data.venue && data.address) {
@@ -206,7 +207,8 @@ export function updateEvent(id: number, data: Partial<Event>): void {
   const allowed = [
     'name', 'date_time', 'venue', 'address', 'cost', 'description',
     'sponsors', 'facebook_url', 'website', 'image', 'latitude', 'longitude',
-    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status', 'tags', 'venue_website'
+    'is_workshop', 'contact_name', 'contact_email', 'contact_phone', 'status', 'tags', 'venue_website',
+    'questions_by', 'emcee', 'theme'
   ] as const;
 
   const notNullFields = new Set(['contact_name', 'contact_email']);
@@ -342,6 +344,9 @@ export function getPendingChangeRequests(): (ChangeRequest & { event: Event })[]
       contact_phone: r.contact_phone as string | null,
       tags: r.tags as string | null,
       venue_website: r.venue_website as string | null,
+      questions_by: r.questions_by as string | null,
+      emcee: r.emcee as string | null,
+      theme: r.theme as string | null,
       status: r.event_status as 'pending' | 'approved' | 'rejected',
       created_at: r.created_at,
     },

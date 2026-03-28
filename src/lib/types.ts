@@ -26,6 +26,9 @@ export interface Event {
   contact_phone: string | null;
   tags: string | null; // JSON-encoded EventTags
   venue_website: string | null;
+  questions_by: string | null;
+  emcee: string | null;
+  theme: string | null;
   status: 'pending' | 'approved' | 'rejected';
   created_at: string;
 }

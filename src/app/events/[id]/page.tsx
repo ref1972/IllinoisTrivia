@@ -186,6 +186,29 @@ export default async function EventPage({ params }: { params: { id: string } }) 
           )}
         </div>
 
+        {(event.questions_by || event.emcee || event.theme) && (
+          <div className="grid sm:grid-cols-3 gap-6 mt-6">
+            {event.questions_by && (
+              <div>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Questions Written By</h3>
+                <p className="text-gray-800">{event.questions_by}</p>
+              </div>
+            )}
+            {event.emcee && (
+              <div>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Emcee</h3>
+                <p className="text-gray-800">{event.emcee}</p>
+              </div>
+            )}
+            {event.theme && (
+              <div>
+                <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Theme</h3>
+                <p className="text-gray-800">{event.theme}</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {event.sponsors && (
           <div className="mt-6">
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Presenting Sponsors</h3>

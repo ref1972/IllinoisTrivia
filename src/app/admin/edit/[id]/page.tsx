@@ -69,6 +69,9 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
       cost: formData.get("cost"),
       description: formData.get("description"),
       sponsors: formData.get("sponsors") || null,
+      questions_by: formData.get("questions_by") || null,
+      emcee: formData.get("emcee") || null,
+      theme: formData.get("theme") || null,
       facebook_url: formData.get("facebook_url") || null,
       website: formData.get("website") || null,
       is_workshop: formData.get("is_workshop") ? 1 : 0,
@@ -177,6 +180,21 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
         <div>
           <label className={labelClass} htmlFor="sponsors">Presenting Sponsors</label>
           <input type="text" id="sponsors" name="sponsors" className={inputClass} defaultValue={event.sponsors || ""} />
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label className={labelClass} htmlFor="questions_by">Questions Written By</label>
+            <input type="text" id="questions_by" name="questions_by" className={inputClass} defaultValue={event.questions_by || ""} />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="emcee">Emcee</label>
+            <input type="text" id="emcee" name="emcee" className={inputClass} defaultValue={event.emcee || ""} />
+          </div>
+          <div>
+            <label className={labelClass} htmlFor="theme">Theme</label>
+            <input type="text" id="theme" name="theme" className={inputClass} defaultValue={event.theme || ""} />
+          </div>
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">
