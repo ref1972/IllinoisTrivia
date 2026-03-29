@@ -30,6 +30,12 @@ export default async function AdminPage() {
         <div className="flex items-center gap-3">
           <AdminCleanupImages />
           <Link
+            href="/admin/subscribers"
+            className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
+          >
+            Subscribers
+          </Link>
+          <Link
             href="/admin/venues"
             className="bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
           >

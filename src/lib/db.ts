@@ -257,6 +257,10 @@ export function removeSubscriber(token: string): void {
   db.prepare(`DELETE FROM subscribers WHERE unsubscribe_token = ?`).run(token);
 }
 
+export function getAllSubscribers(): Subscriber[] {
+  return db.prepare(`SELECT * FROM subscribers ORDER BY created_at DESC`).all() as Subscriber[];
+}
+
 export function getSubscribersForRegion(region: string): Subscriber[] {
   return db.prepare(
     `SELECT * FROM subscribers WHERE region = 'All Illinois' OR region = ?`
