@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import dynamic from "next/dynamic";
 import { PubQuiz } from "@/lib/types";
 
@@ -15,33 +16,77 @@ function formatBadge(q: PubQuiz) {
   return null;
 }
 
+function formatOneOffDate(dateStr: string) {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+    weekday: "long", month: "long", day: "numeric", year: "numeric",
+  });
+}
+
+function QuizCard({ q }: { q: PubQuiz }) {
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-start gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+      {q.image && (
+        <div className="shrink-0">
+          <Image src={`/uploads/${q.image}`} alt={q.venue} width={64} height={64} unoptimized className="w-16 h-16 object-cover rounded" />
+        </div>
+      )}
+      <div className="text-[#C83803] font-semibold text-sm w-20 shrink-0 pt-0.5 hidden sm:block">{q.start_time}</div>
+      <div className="flex-1 min-w-0">
+        <div className="font-semibold text-[#0B1C3A]">{q.venue} <span className="sm:hidden text-[#C83803] font-normal text-sm">· {q.start_time}</span></div>
+        <div className="text-sm text-gray-500">{q.address}, {q.city}</div>
+        {(q.quiz_company || q.host) && (
+          <div className="text-sm text-gray-500">
+            {q.quiz_company && <span>{q.quiz_company}</span>}
+            {q.quiz_company && q.host && <span> &middot; </span>}
+            {q.host && <span>Host: {q.host}</span>}
+          </div>
+        )}
+        {q.description && <div className="text-sm text-gray-600 mt-1">{q.description}</div>}
+        <div className="flex gap-3 mt-1">
+          {q.venue_website && <a href={q.venue_website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#C83803] hover:underline">Venue Site</a>}
+          {q.website && <a href={q.website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#C83803] hover:underline">Quiz Info</a>}
+        </div>
+      </div>
+      <div className="shrink-0">
+        {formatBadge(q) && (
+          <span className="inline-block bg-[#0B1C3A] text-white text-xs px-2 py-0.5 rounded-full">
+            {formatBadge(q)}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
   const [tab, setTab] = useState<"list" | "map">("list");
   const [cityFilter, setCityFilter] = useState("all");
   const [dayFilter, setDayFilter] = useState("all");
 
-  const cities = useMemo(() => {
-    const set = new Set(quizzes.map(q => q.city));
-    return Array.from(set).sort();
-  }, [quizzes]);
+  const recurring = useMemo(() => quizzes.filter(q => q.event_type === "recurring"), [quizzes]);
+  const oneOff = useMemo(() => quizzes.filter(q => q.event_type === "one_off"), [quizzes]);
 
-  const filtered = useMemo(() => {
-    return quizzes.filter(q => {
+  const cities = useMemo(() => {
+    const set = new Set(recurring.map(q => q.city));
+    return Array.from(set).sort();
+  }, [recurring]);
+
+  const filteredRecurring = useMemo(() => {
+    return recurring.filter(q => {
       if (cityFilter !== "all" && q.city !== cityFilter) return false;
       if (dayFilter !== "all" && q.day_of_week !== dayFilter) return false;
       return true;
     });
-  }, [quizzes, cityFilter, dayFilter]);
+  }, [recurring, cityFilter, dayFilter]);
 
-  // Group filtered list by day
   const byDay = useMemo(() => {
     const map: Record<string, PubQuiz[]> = {};
     for (const day of DAYS) {
-      const group = filtered.filter(q => q.day_of_week === day);
+      const group = filteredRecurring.filter(q => q.day_of_week === day);
       if (group.length > 0) map[day] = group;
     }
     return map;
-  }, [filtered]);
+  }, [filteredRecurring]);
 
   const tabClass = (t: "list" | "map") =>
     `px-5 py-2 text-sm font-medium rounded-t border-b-2 transition-colors ${
@@ -58,7 +103,7 @@ export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
         <div>
           <h1 className="text-3xl font-bold text-[#0B1C3A]">Pub Quiz Finder</h1>
-          <p className="text-gray-500 text-sm mt-1">Recurring bar trivia nights across Illinois</p>
+          <p className="text-gray-500 text-sm mt-1">Bar trivia nights across Illinois</p>
         </div>
         <Link
           href="/pub-quiz/submit"
@@ -68,7 +113,22 @@ export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
         </Link>
       </div>
 
-      {/* Filters */}
+      {/* One-off / theme nights */}
+      {oneOff.length > 0 && (
+        <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <h2 className="text-sm font-bold text-[#0B1C3A] uppercase tracking-wider mb-3">Upcoming Theme Nights &amp; Special Events</h2>
+          <div className="space-y-2">
+            {oneOff.map(q => (
+              <div key={q.id}>
+                <div className="text-xs font-semibold text-amber-700 mb-1">{q.event_date ? formatOneOffDate(q.event_date) : ""}</div>
+                <QuizCard q={q} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Filters for recurring */}
       <div className="flex flex-wrap gap-3 mb-4">
         <select value={cityFilter} onChange={e => setCityFilter(e.target.value)} className={selectClass}>
           <option value="all">All Cities</option>
@@ -83,7 +143,7 @@ export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
             Clear filters
           </button>
         )}
-        <span className="text-sm text-gray-400 self-center">{filtered.length} listing{filtered.length !== 1 ? "s" : ""}</span>
+        <span className="text-sm text-gray-400 self-center">{filteredRecurring.length} weekly listing{filteredRecurring.length !== 1 ? "s" : ""}</span>
       </div>
 
       {/* Tabs */}
@@ -94,12 +154,11 @@ export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
         </div>
       </div>
 
-      {/* Tab content */}
       <div className="bg-white border border-t-0 border-gray-200 rounded-b-lg">
         {tab === "list" ? (
           <div className="p-4">
-            {filtered.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">No listings match your filters.</p>
+            {filteredRecurring.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">No weekly listings match your filters.</p>
             ) : (
               <div className="space-y-6">
                 {Object.entries(byDay).map(([day, items]) => (
@@ -108,34 +167,7 @@ export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
                       {day}s
                     </h2>
                     <div className="space-y-2">
-                      {items.map(q => (
-                        <div key={q.id} className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors">
-                          <div className="text-[#C83803] font-semibold text-sm w-20 shrink-0 pt-0.5">{q.start_time}</div>
-                          <div className="flex-1 min-w-0">
-                            <div className="font-semibold text-[#0B1C3A]">{q.venue}</div>
-                            <div className="text-sm text-gray-500">{q.address}, {q.city}</div>
-                            {(q.quiz_company || q.host) && (
-                              <div className="text-sm text-gray-500">
-                                {q.quiz_company && <span>{q.quiz_company}</span>}
-                                {q.quiz_company && q.host && <span> &middot; </span>}
-                                {q.host && <span>Host: {q.host}</span>}
-                              </div>
-                            )}
-                            {q.description && <div className="text-sm text-gray-600 mt-1">{q.description}</div>}
-                            <div className="flex gap-3 mt-1">
-                              {q.venue_website && <a href={q.venue_website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#C83803] hover:underline">Venue Site</a>}
-                              {q.website && <a href={q.website} target="_blank" rel="noopener noreferrer" className="text-xs text-[#C83803] hover:underline">Quiz Info</a>}
-                            </div>
-                          </div>
-                          <div className="shrink-0">
-                            {formatBadge(q) && (
-                              <span className="inline-block bg-[#0B1C3A] text-white text-xs px-2 py-0.5 rounded-full">
-                                {formatBadge(q)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                      {items.map(q => <QuizCard key={q.id} q={q} />)}
                     </div>
                   </div>
                 ))}
@@ -143,7 +175,7 @@ export default function PubQuizClient({ quizzes }: { quizzes: PubQuiz[] }) {
             )}
           </div>
         ) : (
-          <PubQuizMap quizzes={filtered} />
+          <PubQuizMap quizzes={[...filteredRecurring, ...oneOff]} />
         )}
       </div>
     </div>

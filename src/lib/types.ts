@@ -40,11 +40,14 @@ export interface PubQuiz {
   venue: string;
   address: string;
   city: string;
-  day_of_week: string; // 'Monday' | 'Tuesday' | ...
+  day_of_week: string | null; // 'Monday' | 'Tuesday' | ... (null for one_off events)
   start_time: string;  // e.g. '7:00 PM'
   quiz_company: string | null;
   host: string | null;
   description: string | null;
+  event_type: 'recurring' | 'one_off';
+  event_date: string | null; // ISO date for one_off events
+  image: string | null;
   format: 'pen_paper' | 'mobile_app' | null;
   venue_website: string | null;
   website: string | null;

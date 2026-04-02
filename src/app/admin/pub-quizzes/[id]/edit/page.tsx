@@ -52,17 +52,31 @@ export default async function EditPubQuizPage({ params }: { params: { id: string
           </div>
         </div>
 
+        <div>
+          <label className={labelClass}>Event Type</label>
+          <select name="event_type" defaultValue={quiz.event_type} className={inputClass}>
+            <option value="recurring">Weekly Recurring</option>
+            <option value="one_off">One-Off / Theme Night</option>
+          </select>
+        </div>
+
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Day of the Week</label>
-            <select name="day_of_week" defaultValue={quiz.day_of_week} required className={inputClass}>
+            <select name="day_of_week" defaultValue={quiz.day_of_week || ""} className={inputClass}>
+              <option value="">— none —</option>
               {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
           <div>
-            <label className={labelClass}>Start Time</label>
-            <input type="text" name="start_time" defaultValue={quiz.start_time} required className={inputClass} />
+            <label className={labelClass}>Event Date <span className="text-gray-400 font-normal">(one-off only)</span></label>
+            <input type="date" name="event_date" defaultValue={quiz.event_date || ""} className={inputClass} />
           </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>Start Time</label>
+          <input type="text" name="start_time" defaultValue={quiz.start_time} required className={inputClass} />
         </div>
 
         <div className="grid sm:grid-cols-2 gap-4">

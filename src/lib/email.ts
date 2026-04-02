@@ -195,7 +195,7 @@ export async function sendChangeRequestNotification(event: { name: string; id: n
   }
 }
 
-export async function sendPubQuizSubmissionEmails(quiz: { venue: string; city: string; day_of_week: string; start_time: string; submitter_name?: string | null; submitter_email?: string | null }) {
+export async function sendPubQuizSubmissionEmails(quiz: { venue: string; city: string; day_of_week?: string | null; start_time: string; submitter_name?: string | null; submitter_email?: string | null }) {
   try {
     await getResend().emails.send({
       from: FROM_EMAIL,
@@ -207,7 +207,7 @@ export async function sendPubQuizSubmissionEmails(quiz: { venue: string; city: s
         <table style="border-collapse: collapse; margin: 16px 0;">
           <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Venue</td><td style="padding: 6px 12px;">${quiz.venue}</td></tr>
           <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">City</td><td style="padding: 6px 12px;">${quiz.city}</td></tr>
-          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">When</td><td style="padding: 6px 12px;">${quiz.day_of_week}s at ${quiz.start_time}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">When</td><td style="padding: 6px 12px;">${quiz.day_of_week ? `${quiz.day_of_week}s at ${quiz.start_time}` : quiz.start_time}</td></tr>
           ${quiz.submitter_name ? `<tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Submitted by</td><td style="padding: 6px 12px;">${quiz.submitter_name}${quiz.submitter_email ? ` (${quiz.submitter_email})` : ''}</td></tr>` : ''}
         </table>
         <p style="margin-top: 20px;">

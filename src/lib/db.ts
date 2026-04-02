@@ -95,6 +95,9 @@ db.exec(`
     quiz_company TEXT,
     host TEXT,
     description TEXT,
+    event_type TEXT NOT NULL DEFAULT 'recurring' CHECK(event_type IN ('recurring', 'one_off')),
+    event_date TEXT,
+    image TEXT,
     format TEXT CHECK(format IN ('pen_paper', 'mobile_app')),
     venue_website TEXT,
     website TEXT,
@@ -450,10 +453,11 @@ import { PubQuiz } from './types';
 export function insertPubQuiz(data: Omit<PubQuiz, 'id' | 'status' | 'latitude' | 'longitude' | 'created_at' | 'manage_token'>): { id: number; manage_token: string } {
   const manage_token = crypto.randomBytes(32).toString('hex');
   const result = db.prepare(`
-    INSERT INTO pub_quizzes (venue, address, city, day_of_week, start_time, quiz_company, host, description, format, venue_website, website, submitter_name, submitter_email, manage_token)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO pub_quizzes (venue, address, city, day_of_week, start_time, event_type, event_date, image, quiz_company, host, description, format, venue_website, website, submitter_name, submitter_email, manage_token)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
-    data.venue, data.address, data.city, data.day_of_week, data.start_time,
+    data.venue, data.address, data.city, data.day_of_week || null, data.start_time,
+    data.event_type || 'recurring', data.event_date || null, data.image || null,
     data.quiz_company || null, data.host || null, data.description || null,
     data.format || null, data.venue_website || null, data.website || null,
     data.submitter_name || null, data.submitter_email || null, manage_token
@@ -462,7 +466,12 @@ export function insertPubQuiz(data: Omit<PubQuiz, 'id' | 'status' | 'latitude' |
 }
 
 export function getApprovedPubQuizzes(): PubQuiz[] {
-  return db.prepare(`SELECT * FROM pub_quizzes WHERE status = 'approved' ORDER BY day_of_week, start_time`).all() as PubQuiz[];
+  return db.prepare(`
+    SELECT * FROM pub_quizzes
+    WHERE status = 'approved'
+      AND (event_type = 'recurring' OR (event_type = 'one_off' AND event_date >= date('now')))
+    ORDER BY event_type DESC, event_date ASC, day_of_week, start_time
+  `).all() as PubQuiz[];
 }
 
 export function getPendingPubQuizzes(): PubQuiz[] {
@@ -482,7 +491,7 @@ export function getPubQuizByManageToken(token: string): PubQuiz | undefined {
 }
 
 export function updatePubQuiz(id: number, data: Partial<PubQuiz>): void {
-  const allowed = ['venue', 'address', 'city', 'day_of_week', 'start_time', 'quiz_company', 'host', 'description', 'format', 'venue_website', 'website', 'status', 'latitude', 'longitude'] as const;
+  const allowed = ['venue', 'address', 'city', 'day_of_week', 'start_time', 'event_type', 'event_date', 'image', 'quiz_company', 'host', 'description', 'format', 'venue_website', 'website', 'status', 'latitude', 'longitude'] as const;
   const fields: string[] = [];
   const values: unknown[] = [];
   for (const key of allowed) {
