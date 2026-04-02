@@ -44,7 +44,8 @@
       "Skill(update-config:*)",
       "Bash(/opt/homebrew/bin/node -e \":*)",
       "Bash(git stash:*)",
-      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")"
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(export PATH=/usr/local/bin:/opt/homebrew/bin:$PATH)"
     ]
   }
 }

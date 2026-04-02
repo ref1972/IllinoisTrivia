@@ -1,30 +1,129 @@
-import Link from "next/link";
-import { redirect, notFound } from "next/navigation";
-import { isAdmin } from "@/lib/auth";
-import { getPubQuizById } from "@/lib/db";
-import { savePubQuizEdit } from "../../actions";
+"use client";
 
-export const dynamic = "force-dynamic";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
+import { PubQuiz } from "@/lib/types";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
-export default async function EditPubQuizPage({ params }: { params: { id: string } }) {
-  const admin = await isAdmin();
-  if (!admin) redirect("/admin/login");
+export default function EditPubQuizPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const [quiz, setQuiz] = useState<PubQuiz | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [removingImage, setRemovingImage] = useState(false);
 
-  const id = parseInt(params.id, 10);
-  const quiz = getPubQuizById(id);
-  if (!quiz) notFound();
+  useEffect(() => {
+    fetch(`/api/admin/pub-quizzes/${params.id}`)
+      .then(r => { if (!r.ok) throw new Error("Not found"); return r.json(); })
+      .then(d => { setQuiz(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, [params.id]);
+
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    setImageFile(file);
+    if (file) setImagePreview(URL.createObjectURL(file));
+  }
+
+  async function handleRemoveImage() {
+    if (!confirm("Remove this image?")) return;
+    setRemovingImage(true);
+    try {
+      await fetch(`/api/admin/pub-quizzes/${params.id}/image`, { method: "DELETE" });
+      setQuiz(q => q ? { ...q, image: null } : q);
+      setImageFile(null);
+      setImagePreview(null);
+    } finally {
+      setRemovingImage(false);
+    }
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    setSuccess(false);
+
+    const form = e.currentTarget;
+    const data = new FormData(form);
+
+    // Upload image first if one was selected
+    if (imageFile) {
+      const uploadData = new FormData();
+      uploadData.append("image", imageFile);
+      const uploadRes = await fetch(`/api/admin/pub-quizzes/${params.id}/image`, {
+        method: "POST",
+        body: uploadData,
+      });
+      if (!uploadRes.ok) {
+        const d = await uploadRes.json();
+        setError(d.error || "Image upload failed");
+        setSaving(false);
+        return;
+      }
+      const { filename } = await uploadRes.json();
+      setQuiz(q => q ? { ...q, image: filename } : q);
+      setImageFile(null);
+      setImagePreview(null);
+    }
+
+    // Save the rest of the fields
+    const body: Record<string, unknown> = {
+      venue: data.get("venue"),
+      address: data.get("address"),
+      city: data.get("city"),
+      event_type: data.get("event_type"),
+      day_of_week: data.get("day_of_week") || null,
+      event_date: data.get("event_date") || null,
+      start_time: data.get("start_time"),
+      quiz_company: data.get("quiz_company") || null,
+      host: data.get("host") || null,
+      description: data.get("description") || null,
+      format: data.get("format") || null,
+      venue_website: data.get("venue_website") || null,
+      website: data.get("website") || null,
+      status: data.get("status"),
+    };
+
+    const res = await fetch(`/api/admin/pub-quizzes/${params.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (!res.ok) {
+      setError("Save failed");
+    } else {
+      setSuccess(true);
+      setTimeout(() => router.push("/admin/pub-quizzes"), 1000);
+    }
+    setSaving(false);
+  }
 
   const inputClass = "w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0B1C3A]";
   const labelClass = "block text-sm font-medium text-gray-700 mb-1";
+
+  if (loading) return <div className="py-16 text-center text-gray-400">Loading…</div>;
+  if (!quiz) return <div className="py-16 text-center text-gray-500">Listing not found.</div>;
+
+  const currentImage = imagePreview || (quiz.image ? `/uploads/${quiz.image}` : null);
 
   return (
     <div className="max-w-2xl">
       <Link href="/admin/pub-quizzes" className="text-[#C83803] hover:underline text-sm">&larr; Back to Pub Quiz Listings</Link>
       <h1 className="text-2xl font-bold text-[#0B1C3A] mt-2 mb-6">Edit Pub Quiz Listing</h1>
 
-      <form action={savePubQuizEdit.bind(null, id)} className="bg-white rounded-lg border p-6 space-y-4">
+      {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 mb-4">{error}</div>}
+      {success && <div className="bg-green-50 border border-green-200 text-green-700 rounded p-3 mb-4">Saved! Redirecting…</div>}
+
+      <form onSubmit={handleSubmit} className="bg-white rounded-lg border p-6 space-y-4">
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Venue Name</label>
@@ -113,6 +212,28 @@ export default async function EditPubQuizPage({ params }: { params: { id: string
           </div>
         </div>
 
+        {/* Image */}
+        <div>
+          <label className={labelClass}>Event Graphic</label>
+          {currentImage && (
+            <div className="mb-2 flex items-center gap-3">
+              <Image src={currentImage} alt="Current" width={120} height={80} unoptimized className="rounded border object-cover h-20 w-auto" />
+              {!imagePreview && (
+                <button type="button" onClick={handleRemoveImage} disabled={removingImage} className="text-xs text-red-500 hover:text-red-700">
+                  {removingImage ? "Removing…" : "Remove image"}
+                </button>
+              )}
+            </div>
+          )}
+          <input
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            onChange={handleImageChange}
+            className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-[#C83803] file:text-white hover:file:bg-red-700 file:cursor-pointer"
+          />
+          <p className="text-xs text-gray-400 mt-1">JPG, PNG, WebP, or GIF. Max 5MB.</p>
+        </div>
+
         <div>
           <label className={labelClass}>Status</label>
           <select name="status" defaultValue={quiz.status} className={inputClass}>
@@ -129,8 +250,8 @@ export default async function EditPubQuizPage({ params }: { params: { id: string
         )}
 
         <div className="flex gap-3 pt-2">
-          <button type="submit" className="bg-[#C83803] text-white px-6 py-2 rounded font-medium hover:bg-orange-800 transition-colors">
-            Save Changes
+          <button type="submit" disabled={saving} className="bg-[#C83803] text-white px-6 py-2 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50">
+            {saving ? "Saving…" : "Save Changes"}
           </button>
           <Link href="/admin/pub-quizzes" className="px-6 py-2 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium">
             Cancel
