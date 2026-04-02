@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { getAllPubQuizzes } from "@/lib/db";
-import { approvePubQuiz, rejectPubQuiz, removePubQuiz } from "./actions";
+import { approvePubQuiz, rejectPubQuiz } from "./actions";
+import PubQuizDeleteButton from "./PubQuizDeleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -98,9 +99,7 @@ export default async function AdminPubQuizzesPage() {
                             <button type="submit" className="text-green-600 hover:underline text-sm">Approve</button>
                           </form>
                         )}
-                        <form action={removePubQuiz.bind(null, q.id)} className="inline" onSubmit={e => { if (!confirm("Delete this listing?")) e.preventDefault(); }}>
-                          <button type="submit" className="text-red-400 hover:text-red-600 text-sm">Delete</button>
-                        </form>
+                        <PubQuizDeleteButton id={q.id} />
                       </div>
                     </td>
                   </tr>
