@@ -41,7 +41,9 @@
       "Bash(pkill -f 'next dev')",
       "Bash(pkill -f 'next start')",
       "Skill(update-config)",
-      "Skill(update-config:*)"
+      "Skill(update-config:*)",
+      "Bash(/opt/homebrew/bin/node -e \":*)",
+      "Bash(git stash:*)"
     ]
   }
 }

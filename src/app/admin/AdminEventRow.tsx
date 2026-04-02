@@ -11,7 +11,7 @@ export default function AdminEventRow({ event, views }: { event: Event; views: n
   return (
     <tr className="border-b last:border-b-0">
       <td className="px-4 py-2 text-gray-800">{event.name}</td>
-      <td className="px-4 py-2 text-gray-600">{new Date(event.date_time).toLocaleDateString()}</td>
+      <td className="px-4 py-2 text-gray-600">{new Date(event.date_time).toLocaleDateString("en-US")}</td>
       <td className="px-4 py-2">
         {event.is_workshop === 1 && (
           <span className="inline-block bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-xs font-medium">Workshop</span>
