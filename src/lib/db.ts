@@ -84,6 +84,30 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS pub_quizzes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    venue TEXT NOT NULL,
+    address TEXT NOT NULL,
+    city TEXT NOT NULL,
+    day_of_week TEXT NOT NULL,
+    start_time TEXT NOT NULL,
+    quiz_company TEXT,
+    host TEXT,
+    description TEXT,
+    format TEXT CHECK(format IN ('pen_paper', 'mobile_app')),
+    venue_website TEXT,
+    website TEXT,
+    submitter_name TEXT,
+    submitter_email TEXT,
+    manage_token TEXT,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
+    latitude REAL,
+    longitude REAL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
 // Initialize defaults
 const captchaSetting = db.prepare(`SELECT value FROM settings WHERE key = 'captcha_enabled'`).get();
 if (!captchaSetting) {
@@ -417,6 +441,71 @@ export function getEventsWithoutCoords(): Event[] {
   return db.prepare(
     `SELECT * FROM events WHERE status = 'approved' AND (latitude IS NULL OR longitude IS NULL) ORDER BY date_time ASC`
   ).all() as Event[];
+}
+
+// ── Pub Quizzes ──────────────────────────────────────────────────────────────
+
+import { PubQuiz } from './types';
+
+export function insertPubQuiz(data: Omit<PubQuiz, 'id' | 'status' | 'latitude' | 'longitude' | 'created_at' | 'manage_token'>): { id: number; manage_token: string } {
+  const manage_token = crypto.randomBytes(32).toString('hex');
+  const result = db.prepare(`
+    INSERT INTO pub_quizzes (venue, address, city, day_of_week, start_time, quiz_company, host, description, format, venue_website, website, submitter_name, submitter_email, manage_token)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `).run(
+    data.venue, data.address, data.city, data.day_of_week, data.start_time,
+    data.quiz_company || null, data.host || null, data.description || null,
+    data.format || null, data.venue_website || null, data.website || null,
+    data.submitter_name || null, data.submitter_email || null, manage_token
+  );
+  return { id: Number(result.lastInsertRowid), manage_token };
+}
+
+export function getApprovedPubQuizzes(): PubQuiz[] {
+  return db.prepare(`SELECT * FROM pub_quizzes WHERE status = 'approved' ORDER BY day_of_week, start_time`).all() as PubQuiz[];
+}
+
+export function getPendingPubQuizzes(): PubQuiz[] {
+  return db.prepare(`SELECT * FROM pub_quizzes WHERE status = 'pending' ORDER BY created_at DESC`).all() as PubQuiz[];
+}
+
+export function getAllPubQuizzes(): PubQuiz[] {
+  return db.prepare(`SELECT * FROM pub_quizzes ORDER BY created_at DESC`).all() as PubQuiz[];
+}
+
+export function getPubQuizById(id: number): PubQuiz | undefined {
+  return db.prepare(`SELECT * FROM pub_quizzes WHERE id = ?`).get(id) as PubQuiz | undefined;
+}
+
+export function getPubQuizByManageToken(token: string): PubQuiz | undefined {
+  return db.prepare(`SELECT * FROM pub_quizzes WHERE manage_token = ?`).get(token) as PubQuiz | undefined;
+}
+
+export function updatePubQuiz(id: number, data: Partial<PubQuiz>): void {
+  const allowed = ['venue', 'address', 'city', 'day_of_week', 'start_time', 'quiz_company', 'host', 'description', 'format', 'venue_website', 'website', 'status', 'latitude', 'longitude'] as const;
+  const fields: string[] = [];
+  const values: unknown[] = [];
+  for (const key of allowed) {
+    if (key in data) {
+      fields.push(`${key} = ?`);
+      values.push(data[key] ?? null);
+    }
+  }
+  if (fields.length === 0) return;
+  values.push(id);
+  db.prepare(`UPDATE pub_quizzes SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+}
+
+export function deletePubQuiz(id: number): void {
+  db.prepare(`DELETE FROM pub_quizzes WHERE id = ?`).run(id);
+}
+
+export function getPubQuizzesWithoutCoords(): PubQuiz[] {
+  return db.prepare(`SELECT * FROM pub_quizzes WHERE status = 'approved' AND (latitude IS NULL OR longitude IS NULL)`).all() as PubQuiz[];
+}
+
+export function getPendingPubQuizCount(): number {
+  return (db.prepare(`SELECT COUNT(*) as c FROM pub_quizzes WHERE status = 'pending'`).get() as { c: number }).c;
 }
 
 export function getTotalStats(): { total: number; approved: number; pending: number; totalViews: number } {

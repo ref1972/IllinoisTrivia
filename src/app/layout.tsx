@@ -46,6 +46,9 @@ export default function RootLayout({
                 <Link href="/map" className="text-[#0B1C3A] font-medium hover:text-[#C83803] transition-colors">
                   Map
                 </Link>
+                <Link href="/pub-quiz" className="text-[#0B1C3A] font-medium hover:text-[#C83803] transition-colors">
+                  Pub Quiz
+                </Link>
                 <Link href="/past-events" className="text-[#0B1C3A] font-medium hover:text-[#C83803] transition-colors">
                   Past Events
                 </Link>

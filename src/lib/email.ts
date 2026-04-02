@@ -195,6 +195,70 @@ export async function sendChangeRequestNotification(event: { name: string; id: n
   }
 }
 
+export async function sendPubQuizSubmissionEmails(quiz: { venue: string; city: string; day_of_week: string; start_time: string; submitter_name?: string | null; submitter_email?: string | null }) {
+  try {
+    await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: ADMIN_EMAIL,
+      subject: `New Pub Quiz Submission: ${quiz.venue} (${quiz.city})`,
+      html: `
+        <h2>New Pub Quiz Listing Submitted</h2>
+        <p>A new pub quiz listing is awaiting your approval on IllinoisTrivia.com.</p>
+        <table style="border-collapse: collapse; margin: 16px 0;">
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Venue</td><td style="padding: 6px 12px;">${quiz.venue}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">City</td><td style="padding: 6px 12px;">${quiz.city}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">When</td><td style="padding: 6px 12px;">${quiz.day_of_week}s at ${quiz.start_time}</td></tr>
+          ${quiz.submitter_name ? `<tr><td style="padding: 6px 12px; font-weight: bold; color: #0B1C3A;">Submitted by</td><td style="padding: 6px 12px;">${quiz.submitter_name}${quiz.submitter_email ? ` (${quiz.submitter_email})` : ''}</td></tr>` : ''}
+        </table>
+        <p style="margin-top: 20px;">
+          <a href="https://illinoistrivia.com/admin/pub-quizzes" style="background-color: #C83803; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+            Review in Admin Dashboard
+          </a>
+        </p>
+      `,
+    });
+  } catch (err) {
+    console.error('Failed to send pub quiz admin notification:', err);
+  }
+
+  if (quiz.submitter_email) {
+    try {
+      await getResend().emails.send({
+        from: FROM_EMAIL,
+        to: quiz.submitter_email,
+        subject: `Pub Quiz Listing Received: ${quiz.venue}`,
+        html: `
+          <h2>Thanks for Submitting!</h2>
+          <p>We've received your pub quiz listing for <strong>${quiz.venue}</strong> in ${quiz.city}. It will appear on <a href="https://illinoistrivia.com/pub-quiz">IllinoisTrivia.com</a> once approved.</p>
+          <p style="color: #999; font-size: 12px; margin-top: 30px;">&mdash; IllinoisTrivia.com</p>
+        `,
+      });
+    } catch (err) {
+      console.error('Failed to send pub quiz submitter confirmation:', err);
+    }
+  }
+}
+
+export async function sendPubQuizApprovalEmail(quiz: { venue: string; city: string; id: number; submitter_email: string; manage_token: string }) {
+  const manageUrl = `${process.env.NEXTAUTH_URL || 'https://illinoistrivia.com'}/pub-quiz/manage/${quiz.manage_token}`;
+  try {
+    await getResend().emails.send({
+      from: FROM_EMAIL,
+      to: quiz.submitter_email,
+      subject: `Your pub quiz listing is live: ${quiz.venue}`,
+      html: `
+        <h2>Your Listing is Live!</h2>
+        <p>Your pub quiz listing for <strong>${quiz.venue}</strong> in ${quiz.city} has been approved and is now on <a href="https://illinoistrivia.com/pub-quiz">IllinoisTrivia.com</a>.</p>
+        <p style="margin-top: 24px;">Need to make changes or remove the listing? Use your private management link:</p>
+        <p><a href="${manageUrl}" style="color: #C83803;">${manageUrl}</a></p>
+        <p style="color: #999; font-size: 12px; margin-top: 16px;">Keep this link private — anyone with it can request changes to your listing.</p>
+      `,
+    });
+  } catch (err) {
+    console.error('Failed to send pub quiz approval email:', err);
+  }
+}
+
 export async function sendChangeRequestOutcome(email: string, eventName: string, type: 'update' | 'delete', approved: boolean) {
   try {
     await getResend().emails.send({

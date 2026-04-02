@@ -34,3 +34,25 @@ export interface Event {
 }
 
 export type EventFormData = Omit<Event, 'id' | 'status' | 'created_at' | 'is_workshop' | 'latitude' | 'longitude'>;
+
+export interface PubQuiz {
+  id: number;
+  venue: string;
+  address: string;
+  city: string;
+  day_of_week: string; // 'Monday' | 'Tuesday' | ...
+  start_time: string;  // e.g. '7:00 PM'
+  quiz_company: string | null;
+  host: string | null;
+  description: string | null;
+  format: 'pen_paper' | 'mobile_app' | null;
+  venue_website: string | null;
+  website: string | null;
+  submitter_name: string | null;
+  submitter_email: string | null;
+  manage_token: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  latitude: number | null;
+  longitude: number | null;
+  created_at: string;
+}
