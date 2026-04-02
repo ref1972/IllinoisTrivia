@@ -123,6 +123,17 @@ for (const col of columnsToAdd) {
   try { db.exec(`ALTER TABLE events ADD COLUMN ${col}`); } catch { /* already exists */ }
 }
 
+const pubQuizColumnsToAdd = [
+  `event_type TEXT NOT NULL DEFAULT 'recurring'`,
+  'event_date TEXT',
+  'image TEXT',
+  'venue_website TEXT',
+  'website TEXT',
+];
+for (const col of pubQuizColumnsToAdd) {
+  try { db.exec(`ALTER TABLE pub_quizzes ADD COLUMN ${col}`); } catch { /* already exists */ }
+}
+
 export function getSetting(key: string): string | null {
   const row = db.prepare(`SELECT value FROM settings WHERE key = ?`).get(key) as { value: string } | undefined;
   return row?.value ?? null;
