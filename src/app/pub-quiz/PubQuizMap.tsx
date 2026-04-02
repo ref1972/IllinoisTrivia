@@ -13,8 +13,6 @@ const markerIcon = L.divIcon({
   popupAnchor: [0, -14],
 });
 
-const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-
 export default function PubQuizMap({ quizzes }: { quizzes: PubQuiz[] }) {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);

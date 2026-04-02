@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { notFound } from "next/navigation";
 import Link from "next/link";
 
 const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
