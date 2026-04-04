@@ -44,11 +44,11 @@ export default async function EditVenuePage({ params }: { params: { id: string }
           <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
           <input name="website" type="url" defaultValue={venue.website || ""} className={inputClass} />
         </div>
-        <div className="flex gap-3 pt-2">
-          <button type="submit" className="bg-[#C83803] text-white px-5 py-2 rounded font-medium hover:bg-orange-800 transition-colors">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <button type="submit" className="bg-[#C83803] text-white px-5 py-3 rounded font-medium hover:bg-orange-800 transition-colors min-h-[48px] w-full sm:w-auto">
             Save Changes
           </button>
-          <Link href="/admin/venues" className="bg-gray-200 text-gray-700 px-4 py-2 rounded font-medium hover:bg-gray-300 transition-colors">
+          <Link href="/admin/venues" className="bg-gray-200 text-gray-700 px-4 py-3 rounded font-medium hover:bg-gray-300 transition-colors min-h-[48px] text-center w-full sm:w-auto">
             Cancel
           </Link>
         </div>

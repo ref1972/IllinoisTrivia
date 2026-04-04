@@ -5,3 +5,23 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hide public site header/footer on mobile for admin routes */
+@media (max-width: 767px) {
+  body[data-admin="true"] > header,
+  body[data-admin="true"] > footer {
+    display: none;
+  }
+  body[data-admin="true"] > main {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
+/* Touch-friendly admin buttons on mobile */
+@media (max-width: 767px) {
+  body[data-admin="true"] button,
+  body[data-admin="true"] a[class*="rounded"] {
+    touch-action: manipulation;
+  }
+}

@@ -23,7 +23,7 @@ export default async function AdminSubscribersPage() {
           <Link href="/admin" className="text-[#C83803] hover:underline text-sm">
             &larr; Back to admin
           </Link>
-          <h1 className="text-3xl font-bold text-[#0B1C3A] mt-2">Subscribers</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0B1C3A] mt-2">Subscribers</h1>
         </div>
         <div className="text-right">
           <p className="text-3xl font-bold text-[#0B1C3A]">{subscribers.length}</p>
@@ -56,7 +56,8 @@ export default async function AdminSubscribersPage() {
           No subscribers yet.
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+        {/* Desktop table */}
+        <div className="hidden md:block bg-white rounded-lg shadow-sm border overflow-hidden">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
@@ -85,6 +86,27 @@ export default async function AdminSubscribersPage() {
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile list */}
+        <div className="md:hidden bg-white rounded-lg shadow-sm border divide-y">
+          {subscribers.map((s) => (
+            <div key={s.id} className="px-4 py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-800 truncate">{s.email}</span>
+                <span className="inline-block bg-blue-50 text-blue-700 text-xs px-2 py-0.5 rounded-full font-medium shrink-0">
+                  {s.region}
+                </span>
+              </div>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {new Date(s.created_at).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </p>
+            </div>
+          ))}
         </div>
       )}
     </div>

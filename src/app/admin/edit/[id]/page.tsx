@@ -128,7 +128,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
         &larr; Back to admin
       </button>
 
-      <h1 className="text-3xl font-bold text-[#0B1C3A] mb-6">Edit Event</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-[#0B1C3A] mb-6">Edit Event</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 mb-4">
@@ -289,7 +289,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#0B1C3A] text-white px-8 py-3 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto bg-[#0B1C3A] text-white px-8 py-3 rounded font-medium hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>

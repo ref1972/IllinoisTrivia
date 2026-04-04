@@ -64,7 +64,7 @@ export default function AdminCreatePage() {
       <button onClick={() => router.push("/admin")} className="text-[#C83803] hover:underline text-sm mb-6 inline-block">
         &larr; Back to admin
       </button>
-      <h1 className="text-3xl font-bold text-[#0B1C3A] mb-6">Create Event</h1>
+      <h1 className="text-2xl md:text-3xl font-bold text-[#0B1C3A] mb-6">Create Event</h1>
 
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 mb-4">{error}</div>
@@ -173,7 +173,7 @@ export default function AdminCreatePage() {
           <button
             type="submit"
             disabled={saving}
-            className="bg-[#C83803] text-white px-8 py-3 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50"
+            className="w-full sm:w-auto bg-[#C83803] text-white px-8 py-3 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50 min-h-[48px]"
           >
             {saving ? "Creating..." : "Create Event"}
           </button>

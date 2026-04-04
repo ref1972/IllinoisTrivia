@@ -250,7 +250,7 @@ export default function EditPubQuizPage({ params }: { params: { id: string } }) 
         )}
 
         <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={saving} className="bg-[#C83803] text-white px-6 py-2 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50">
+          <button type="submit" disabled={saving} className="w-full sm:w-auto bg-[#C83803] text-white px-6 py-3 rounded font-medium hover:bg-orange-800 transition-colors disabled:opacity-50 min-h-[48px]">
             {saving ? "Saving…" : "Save Changes"}
           </button>
           <Link href="/admin/pub-quizzes" className="px-6 py-2 rounded border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium">

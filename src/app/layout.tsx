@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
+    apple: "/icons/icon-192.png",
   },
+  manifest: "/manifest.json",
   openGraph: {
     siteName: "IllinoisTrivia.com",
     type: "website",

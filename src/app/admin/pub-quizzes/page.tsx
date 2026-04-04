@@ -26,7 +26,7 @@ export default async function AdminPubQuizzesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <Link href="/admin" className="text-[#C83803] hover:underline text-sm">&larr; Back to admin</Link>
-          <h1 className="text-3xl font-bold text-[#0B1C3A] mt-2">Pub Quiz Listings</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#0B1C3A] mt-2">Pub Quiz Listings</h1>
         </div>
         <span className="text-sm text-gray-500">{quizzes.length} total</span>
       </div>
@@ -51,14 +51,14 @@ export default async function AdminPubQuizzesPage() {
                     {q.format && <div className="text-xs text-gray-400 mt-1">{q.format === "pen_paper" ? "Pen & Paper" : "Mobile App"}</div>}
                     {q.submitter_name && <div className="text-xs text-gray-400 mt-1">Submitted by: {q.submitter_name}{q.submitter_email ? ` (${q.submitter_email})` : ""}</div>}
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <form action={approvePubQuiz.bind(null, q.id)}>
-                      <button type="submit" className="bg-green-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-green-700">Approve</button>
+                  <div className="flex gap-2 shrink-0 mt-3 sm:mt-0">
+                    <form action={approvePubQuiz.bind(null, q.id)} className="flex-1 sm:flex-none">
+                      <button type="submit" className="w-full bg-green-600 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-green-700 min-h-[44px]">Approve</button>
                     </form>
-                    <form action={rejectPubQuiz.bind(null, q.id)}>
-                      <button type="submit" className="bg-gray-200 text-gray-700 px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-300">Reject</button>
+                    <form action={rejectPubQuiz.bind(null, q.id)} className="flex-1 sm:flex-none">
+                      <button type="submit" className="w-full bg-gray-200 text-gray-700 px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-gray-300 min-h-[44px]">Reject</button>
                     </form>
-                    <Link href={`/admin/pub-quizzes/${q.id}/edit`} className="bg-[#0B1C3A] text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-blue-900">Edit</Link>
+                    <Link href={`/admin/pub-quizzes/${q.id}/edit`} className="flex-1 sm:flex-none bg-[#0B1C3A] text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-blue-900 min-h-[44px] flex items-center justify-center">Edit</Link>
                   </div>
                 </div>
               </div>
@@ -71,7 +71,8 @@ export default async function AdminPubQuizzesPage() {
       {rest.length > 0 && (
         <div>
           <h2 className="text-lg font-semibold text-[#0B1C3A] mb-3">All Listings</h2>
-          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          {/* Desktop table */}
+          <div className="hidden md:block bg-white rounded-lg shadow-sm border overflow-hidden">
             <table className="w-full text-sm">
               <thead className="bg-gray-50 border-b">
                 <tr>
@@ -106,6 +107,28 @@ export default async function AdminPubQuizzesPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile cards */}
+          <div className="md:hidden space-y-3">
+            {rest.map(q => (
+              <div key={q.id} className="bg-white rounded-lg border p-4">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h3 className="font-medium text-gray-800 text-sm">{q.venue}</h3>
+                  <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium shrink-0 ${statusBadge(q.status)}`}>{q.status}</span>
+                </div>
+                <p className="text-xs text-gray-500">{q.city} · {q.day_of_week}s {q.start_time}</p>
+                <div className="flex items-center gap-3 mt-3">
+                  <Link href={`/admin/pub-quizzes/${q.id}/edit`} className="text-[#C83803] hover:underline text-sm min-h-[44px] flex items-center">Edit</Link>
+                  {q.status === "rejected" && (
+                    <form action={approvePubQuiz.bind(null, q.id)} className="inline">
+                      <button type="submit" className="text-green-600 hover:underline text-sm min-h-[44px]">Approve</button>
+                    </form>
+                  )}
+                  <PubQuizDeleteButton id={q.id} />
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

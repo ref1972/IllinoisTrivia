@@ -26,8 +26,8 @@ export default async function AdminPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-3xl font-bold text-[#0B1C3A]">Admin Dashboard</h1>
-        <div className="flex items-center gap-3">
+        <h1 className="text-2xl md:text-3xl font-bold text-[#0B1C3A]">Admin Dashboard</h1>
+        <div className="hidden md:flex items-center gap-3">
           <AdminCleanupImages />
           <Link
             href="/admin/pub-quizzes"
@@ -134,17 +134,17 @@ export default async function AdminPage() {
                       {event.contact_name && <p className="text-sm text-gray-600 mt-1">Contact: {event.contact_name} — {event.contact_email}</p>}
                     </div>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <Link href={`/admin/edit/${event.id}`} className="bg-[#0B1C3A] text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-700 transition-colors">
+                  <div className="flex gap-2 flex-shrink-0 mt-3 sm:mt-0">
+                    <Link href={`/admin/edit/${event.id}`} className="bg-[#0B1C3A] text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-gray-700 transition-colors flex-1 sm:flex-none text-center min-h-[44px] flex items-center justify-center">
                       Edit
                     </Link>
-                    <form action={async () => { "use server"; await approveEvent(event.id); }}>
-                      <button type="submit" className="bg-green-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                    <form action={async () => { "use server"; await approveEvent(event.id); }} className="flex-1 sm:flex-none">
+                      <button type="submit" className="w-full bg-green-600 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-green-700 transition-colors min-h-[44px]">
                         Approve
                       </button>
                     </form>
-                    <form action={async () => { "use server"; await rejectEvent(event.id); }}>
-                      <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-orange-800 transition-colors">
+                    <form action={async () => { "use server"; await rejectEvent(event.id); }} className="flex-1 sm:flex-none">
+                      <button type="submit" className="w-full bg-red-600 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-orange-800 transition-colors min-h-[44px]">
                         Reject
                       </button>
                     </form>
@@ -187,7 +187,7 @@ export default async function AdminPage() {
                             const current = req.event[key as keyof typeof req.event];
                             const changed = String(current ?? '') !== String(val ?? '');
                             return changed ? (
-                              <div key={key} className="grid grid-cols-[120px_1fr_1fr] gap-2 text-xs">
+                              <div key={key} className="flex flex-col sm:grid sm:grid-cols-[120px_1fr_1fr] gap-1 sm:gap-2 text-xs mb-2 sm:mb-0">
                                 <span className="font-medium text-gray-500">{key}</span>
                                 <span className="text-gray-400 line-through">{String(current ?? '—')}</span>
                                 <span className="text-green-700 font-medium">{String(val ?? '—')}</span>
@@ -200,14 +200,14 @@ export default async function AdminPage() {
                         <p className="text-sm text-red-600">The submitter is requesting this event be removed from the site.</p>
                       )}
                     </div>
-                    <div className="flex gap-2 flex-shrink-0">
-                      <form action={async () => { "use server"; await approveChangeRequest(req.id); }}>
-                        <button type="submit" className="bg-green-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-green-700 transition-colors">
+                    <div className="flex gap-2 flex-shrink-0 mt-3 sm:mt-0">
+                      <form action={async () => { "use server"; await approveChangeRequest(req.id); }} className="flex-1 sm:flex-none">
+                        <button type="submit" className="w-full bg-green-600 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-green-700 transition-colors min-h-[44px]">
                           Approve
                         </button>
                       </form>
-                      <form action={async () => { "use server"; await rejectChangeRequest(req.id); }}>
-                        <button type="submit" className="bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium hover:bg-orange-800 transition-colors">
+                      <form action={async () => { "use server"; await rejectChangeRequest(req.id); }} className="flex-1 sm:flex-none">
+                        <button type="submit" className="w-full bg-red-600 text-white px-4 py-2.5 md:px-3 md:py-1.5 rounded text-sm font-medium hover:bg-orange-800 transition-colors min-h-[44px]">
                           Reject
                         </button>
                       </form>
@@ -230,7 +230,7 @@ export default async function AdminPage() {
         ) : (
           <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-50 border-b hidden md:table-header-group">
                 <tr>
                   <th className="text-left px-4 py-2 font-medium text-gray-600">Event</th>
                   <th className="text-left px-4 py-2 font-medium text-gray-600">Date</th>
