@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
 import { getAllVenues } from "@/lib/db";
-import { createVenue, editVenue, removeVenue } from "./actions";
+import { createVenue, removeVenue } from "./actions";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
