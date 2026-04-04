@@ -56,6 +56,7 @@ export default async function AdminSubscribersPage() {
           No subscribers yet.
         </div>
       ) : (
+        <>
         {/* Desktop table */}
         <div className="hidden md:block bg-white rounded-lg shadow-sm border overflow-hidden">
           <table className="w-full text-sm">
@@ -108,6 +109,7 @@ export default async function AdminSubscribersPage() {
             </div>
           ))}
         </div>
+        </>
       )}
     </div>
   );

@@ -59,6 +59,7 @@ export default async function VenuesPage() {
         {venues.length === 0 ? (
           <p className="text-gray-500 bg-white border rounded-lg p-4">No venues yet. They&apos;ll be added automatically when you create or approve events.</p>
         ) : (
+          <>
           {/* Desktop table */}
           <div className="hidden md:block bg-white border rounded-lg overflow-hidden">
             <table className="w-full text-sm">
@@ -124,6 +125,7 @@ export default async function VenuesPage() {
               </div>
             ))}
           </div>
+          </>
         )}
       </section>
     </div>
