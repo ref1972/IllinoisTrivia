@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { insertEvent, isCaptchaEnabled } from '@/lib/db';
-import { verifyRecaptcha } from '@/lib/recaptcha';
+import { insertEvent } from '@/lib/db';
+import { passesSpamChecks } from '@/lib/anti-spam';
 import { sendSubmissionEmails } from '@/lib/email';
 import { writeFile, mkdir } from 'fs/promises';
 import crypto from 'crypto';
@@ -13,15 +13,20 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
 
-    // Verify reCAPTCHA (if enabled)
-    if (isCaptchaEnabled()) {
-      const recaptchaToken = formData.get('recaptchaToken') as string;
-      if (recaptchaToken) {
-        const valid = await verifyRecaptcha(recaptchaToken);
-        if (!valid) {
-          return NextResponse.json({ error: 'reCAPTCHA verification failed' }, { status: 400 });
-        }
-      }
+    const spamCheck = await passesSpamChecks({
+      request,
+      honeypot: formData.get('company'),
+      recaptchaToken: formData.get('recaptchaToken'),
+      recaptchaAction: 'submit_event',
+      rateLimit: 5,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (spamCheck === 'spam') return NextResponse.json({ success: true }, { status: 201 });
+    if (spamCheck === 'rate_limited') {
+      return NextResponse.json({ error: 'Too many submissions. Please try again later.' }, { status: 429 });
+    }
+    if (spamCheck === 'captcha_failed') {
+      return NextResponse.json({ error: 'Spam verification failed. Please refresh and try again.' }, { status: 400 });
     }
 
     // Validate required fields

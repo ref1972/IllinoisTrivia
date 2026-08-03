@@ -8,23 +8,36 @@ export default function ContactForm() {
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
+  const [company, setCompany] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setStatus("loading");
     setError("");
 
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, message }),
-    });
+    try {
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+      let recaptchaToken = "";
+      if (siteKey && window.grecaptcha) {
+        await new Promise<void>(resolve => window.grecaptcha.ready(resolve));
+        recaptchaToken = await window.grecaptcha.execute(siteKey, { action: "contact" });
+      }
 
-    if (res.ok) {
-      setStatus("success");
-    } else {
-      const data = await res.json();
-      setError(data.error || "Something went wrong. Please try again.");
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, company, recaptchaToken }),
+      });
+
+      if (res.ok) {
+        setStatus("success");
+      } else {
+        const data = await res.json();
+        setError(data.error || "Something went wrong. Please try again.");
+        setStatus("error");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
       setStatus("error");
     }
   }
@@ -43,6 +56,10 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded-lg border shadow-sm p-6 space-y-4">
+      <div className="absolute -left-[10000px]" aria-hidden="true">
+        <label htmlFor="company">Company</label>
+        <input id="company" value={company} onChange={e => setCompany(e.target.value)} tabIndex={-1} autoComplete="off" />
+      </div>
       {status === "error" && (
         <div className="bg-red-50 border border-red-200 text-red-700 rounded p-3 text-sm">{error}</div>
       )}

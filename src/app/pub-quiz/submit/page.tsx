@@ -20,6 +20,14 @@ export default function PubQuizSubmitPage() {
     const formData = new FormData(form);
 
     try {
+      const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+      let recaptchaToken = "";
+      if (siteKey && window.grecaptcha) {
+        await new Promise<void>(resolve => window.grecaptcha.ready(resolve));
+        recaptchaToken = await window.grecaptcha.execute(siteKey, { action: "submit_pub_quiz" });
+      }
+      formData.append("recaptchaToken", recaptchaToken);
+
       const res = await fetch("/api/pub-quizzes", {
         method: "POST",
         body: formData,
@@ -66,6 +74,10 @@ export default function PubQuizSubmitPage() {
       )}
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm border p-6 space-y-4">
+        <div className="absolute -left-[10000px]" aria-hidden="true">
+          <label htmlFor="company">Company</label>
+          <input type="text" id="company" name="company" tabIndex={-1} autoComplete="off" />
+        </div>
 
         {/* Event type toggle */}
         <div>

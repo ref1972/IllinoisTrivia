@@ -5,6 +5,7 @@ import { geocodeAddress } from '@/lib/geocode';
 import { writeFile, mkdir } from 'fs/promises';
 import crypto from 'crypto';
 import { UPLOAD_DIR } from '@/lib/uploads';
+import { passesSpamChecks } from '@/lib/anti-spam';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -12,6 +13,22 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
+
+    const spamCheck = await passesSpamChecks({
+      request,
+      honeypot: formData.get('company'),
+      recaptchaToken: formData.get('recaptchaToken'),
+      recaptchaAction: 'submit_pub_quiz',
+      rateLimit: 5,
+      windowMs: 60 * 60 * 1000,
+    });
+    if (spamCheck === 'spam') return NextResponse.json({ success: true });
+    if (spamCheck === 'rate_limited') {
+      return NextResponse.json({ error: 'Too many submissions. Please try again later.' }, { status: 429 });
+    }
+    if (spamCheck === 'captcha_failed') {
+      return NextResponse.json({ error: 'Spam verification failed. Please refresh and try again.' }, { status: 400 });
+    }
 
     const venue = (formData.get('venue') as string)?.trim();
     const address = (formData.get('address') as string)?.trim();

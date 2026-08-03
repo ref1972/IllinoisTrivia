@@ -68,6 +68,7 @@ export default function SubmitPage() {
       if (formData.get("questions_by")) submitData.append("questions_by", formData.get("questions_by") as string);
       if (formData.get("emcee")) submitData.append("emcee", formData.get("emcee") as string);
       if (formData.get("theme")) submitData.append("theme", formData.get("theme") as string);
+      submitData.append("company", formData.get("company") as string || "");
       submitData.append("recaptchaToken", recaptchaToken);
 
       const imageFile = formData.get("image") as File | null;
@@ -129,6 +130,10 @@ export default function SubmitPage() {
         onSubmit={handleSubmit}
         className="bg-white rounded-lg shadow-sm border p-6 space-y-4"
       >
+        <div className="absolute -left-[10000px]" aria-hidden="true">
+          <label htmlFor="company">Company</label>
+          <input type="text" id="company" name="company" tabIndex={-1} autoComplete="off" />
+        </div>
         <div>
           <label className={labelClass} htmlFor="name">Event Name *</label>
           <input type="text" id="name" name="name" required className={inputClass} placeholder="e.g. Springfield Trivia Night for Charity" />
