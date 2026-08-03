@@ -1,5 +1,5 @@
 import { getMapEvents } from "@/lib/db";
-import EventMap from "./EventMap";
+import EventMapClient from "./EventMapClient";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ export default function MapPage() {
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <EventMap events={mapEvents} />
+          <EventMapClient events={mapEvents} />
         </div>
       )}
     </div>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-interface MapEvent {
+export interface MapEvent {
   id: number;
   name: string;
   venue: string;
