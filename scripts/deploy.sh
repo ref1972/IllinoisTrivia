@@ -20,7 +20,9 @@ STATE_DIR=${STATE_DIR:-/var/lib/illinoistrivia}
 ENV_FILE=${ENV_FILE:-/etc/illinoistrivia.env}
 BACKUP_DIR=${BACKUP_DIR:-/root/backups}
 PM2_APP=${PM2_APP:-illinois-trivia}
-KEEP_RELEASES=${KEEP_RELEASES:-5}
+# Each release carries its own node_modules (~550MB on this app), so retention
+# is deliberately short. Three gives the live release plus two rollback targets.
+KEEP_RELEASES=${KEEP_RELEASES:-3}
 PUBLIC_URL=${PUBLIC_URL:-https://illinoistrivia.com}
 
 log()  { printf '\n== %s\n' "$*"; }
