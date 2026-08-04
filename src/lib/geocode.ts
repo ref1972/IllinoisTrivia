@@ -1,4 +1,5 @@
 import { cacheCoords, lookupKnownCoords } from './db';
+import { extractCity } from './regions';
 
 export interface Coords {
   lat: number;
@@ -48,6 +49,21 @@ async function fetchFromNominatim(address: string): Promise<Coords | null> {
   return { lat, lng };
 }
 
+/**
+ * A city-level query to fall back on when the full address can't be resolved.
+ *
+ * OpenStreetMap's street coverage is patchy in rural Illinois — "2142 Old State
+ * Road, Jacksonville" has no match at all, not even the bare street, while
+ * "Jacksonville, IL 62650" resolves fine. Without this, any venue on an unmapped
+ * road drops off the map entirely rather than showing in roughly the right town.
+ */
+function cityLevelQuery(address: string): string | null {
+  const city = extractCity(address);
+  const zip = address.match(/\b\d{5}\b/)?.[0];
+  if (!city) return null;
+  return [city, 'IL', zip].filter(Boolean).join(', ');
+}
+
 export async function geocodeAddress(address: string): Promise<Coords | null> {
   if (!address?.trim()) return null;
 
@@ -57,8 +73,23 @@ export async function geocodeAddress(address: string): Promise<Coords | null> {
 
   try {
     const coords = await schedule(() => fetchFromNominatim(address));
-    if (coords) cacheCoords(address, coords.lat, coords.lng);
-    return coords;
+    if (coords) {
+      cacheCoords(address, coords.lat, coords.lng);
+      return coords;
+    }
+
+    const fallback = cityLevelQuery(address);
+    if (!fallback) return null;
+
+    const approximate = await schedule(() => fetchFromNominatim(fallback));
+    if (approximate) {
+      // Cached against the original address so the failed street lookup isn't
+      // retried on every pass. Re-running admin's Fix Now after an address edit
+      // still re-queries, since the cache key changes with the address.
+      cacheCoords(address, approximate.lat, approximate.lng);
+      console.log(`[geocode] no street match for "${address}"; used city centre "${fallback}"`);
+    }
+    return approximate;
   } catch (err) {
     console.error('Geocoding failed:', err);
     return null;
