@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { getMapEvents } from "@/lib/db";
 import EventMapClient from "./EventMapClient";
+
+export const metadata: Metadata = {
+  title: "Event Map",
+  description: "Every upcoming trivia night fundraiser in Illinois plotted on a map. Find one near you.",
+};
 
 export const dynamic = "force-dynamic";
 

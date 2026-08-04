@@ -3,7 +3,7 @@ import { getPastEvents } from "@/lib/db";
 import { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Past Events | IllinoisTrivia.com" };
+export const metadata: Metadata = { title: "Past Events" };
 
 function formatDate(dateStr: string): string {
   return new Date(dateStr).toLocaleDateString("en-US", {

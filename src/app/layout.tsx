@@ -5,9 +5,17 @@ import SessionProvider from "@/components/SessionProvider";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
 
+// metadataBase makes relative OG/canonical URLs resolve absolutely, which
+// Facebook and Twitter require. Without it Next warns and emits relative image
+// URLs that scrapers can't fetch.
 export const metadata: Metadata = {
-  title: "IllinoisTrivia.com",
-  description: "Find trivia night fundraising events across Illinois",
+  metadataBase: new URL(process.env.NEXTAUTH_URL || "https://illinoistrivia.com"),
+  title: {
+    default: "Trivia Night Fundraisers Across Illinois | IllinoisTrivia.com",
+    template: "%s | IllinoisTrivia.com",
+  },
+  description:
+    "Find trivia night fundraising events and pub quizzes across Illinois. Browse by city, see them on a map, or list your own event for free.",
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
@@ -17,6 +25,10 @@ export const metadata: Metadata = {
   openGraph: {
     siteName: "IllinoisTrivia.com",
     type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
   },
 };
 

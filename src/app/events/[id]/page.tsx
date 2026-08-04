@@ -31,12 +31,12 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
   if (!event) return { title: "Event Not Found" };
 
   const description = `${formatDate(event.date_time)} at ${event.venue}, ${event.address}. ${event.description.slice(0, 120)}`;
-  const imageUrl = event.image
-    ? `https://illinoistrivia.com/uploads/${event.image}`
-    : "https://illinoistrivia.com/og-default.png";
+  // Defining openGraph here suppresses the inherited opengraph-image, so the
+  // site-wide default is referenced explicitly rather than left empty.
+  const imageUrl = event.image ? `/uploads/${event.image}` : "/opengraph-image";
 
   return {
-    title: `${event.name} | IllinoisTrivia.com`,
+    title: event.name,
     description,
     openGraph: {
       title: event.name,

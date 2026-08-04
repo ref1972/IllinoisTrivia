@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import UnsubscribeForm from "./UnsubscribeForm";
 
-export const metadata: Metadata = { title: "Unsubscribe | IllinoisTrivia.com" };
+export const metadata: Metadata = { title: "Unsubscribe" };
 
 export default function UnsubscribePage({
   searchParams,

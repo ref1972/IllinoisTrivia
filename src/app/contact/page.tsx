@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import ContactForm from "./ContactForm";
 
 export const metadata: Metadata = {
-  title: "Contact | IllinoisTrivia.com",
+  title: "Contact",
   description: "Get in touch with the IllinoisTrivia.com team.",
 };
 

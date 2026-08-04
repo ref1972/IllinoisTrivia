@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getApprovedEvents } from "@/lib/db";
 import EventList from "@/components/EventList";
 import SubscribeForm from "@/components/SubscribeForm";
+
+export const metadata: Metadata = {
+  // The root layout's title template only applies to child segments, so the
+  // brand suffix is spelled out here.
+  title: "Upcoming Trivia Night Fundraisers in Illinois | IllinoisTrivia.com",
+  description: "Browse upcoming trivia night fundraising events across Illinois. Find one near you, or list your own for free.",
+};
 
 export const dynamic = "force-dynamic";
 
