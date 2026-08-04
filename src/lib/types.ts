@@ -30,6 +30,8 @@ export interface Event {
   emcee: string | null;
   theme: string | null;
   status: 'pending' | 'approved' | 'rejected';
+  manage_token?: string | null;
+  notified_at?: string | null;
   created_at: string;
 }
 

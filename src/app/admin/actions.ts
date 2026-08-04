@@ -8,10 +8,11 @@ import {
   setSetting, isCaptchaEnabled, deleteEvent,
   duplicateEvent, insertEventAdmin,
   getChangeRequestById, updateChangeRequestStatus,
-  upsertVenue, getEventsWithoutCoords, markEventNotified,
+  upsertVenue, getEventsWithoutCoords,
 } from "@/lib/db";
 import { geocodeAddress } from "@/lib/geocode";
-import { isImminent, notifySubscribers, sendApprovalEmail, sendChangeRequestOutcome } from "@/lib/email";
+import { applyApprovalSideEffects } from "@/lib/approval";
+import { sendChangeRequestOutcome } from "@/lib/email";
 import { Event } from "@/lib/types";
 
 function revalidateAll(id?: number) {
@@ -26,27 +27,7 @@ export async function approveEvent(id: number) {
   await requireAdmin();
   updateEventStatus(id, "approved");
   const event = getEventByIdAdmin(id);
-  if (event) {
-    if (!event.latitude) {
-      const coords = await geocodeAddress(event.address);
-      if (coords) updateEvent(id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
-    }
-    upsertVenue(event.venue, event.address, event.venue_website);
-    // Events happening soon go out straight away; everything else is picked up
-    // by the weekly digest so subscribers get one email instead of one per event.
-    if (isImminent(event.date_time)) {
-      markEventNotified(event.id);
-      notifySubscribers(event).catch(err => console.error("Failed to notify subscribers:", err));
-    }
-    if (event.contact_email && (event as Event & { manage_token?: string }).manage_token) {
-      sendApprovalEmail({
-        name: event.name,
-        id: event.id,
-        contact_email: event.contact_email,
-        manage_token: (event as Event & { manage_token?: string }).manage_token!,
-      }).catch(err => console.error("Failed to send approval email:", err));
-    }
-  }
+  if (event) await applyApprovalSideEffects(event);
   revalidateAll(id);
 }
 
@@ -61,13 +42,7 @@ export async function bulkApprove(ids: number[]) {
   for (const id of ids) {
     updateEventStatus(id, "approved");
     const event = getEventByIdAdmin(id);
-    if (event) {
-      if (!event.latitude) {
-        const coords = await geocodeAddress(event.address);
-        if (coords) updateEvent(id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
-      }
-      notifySubscribers(event).catch(err => console.error("Failed to notify subscribers:", err));
-    }
+    if (event) await applyApprovalSideEffects(event);
   }
   revalidateAll();
 }

@@ -28,12 +28,20 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    await submitForm(e.currentTarget);
+  }
+
+  // statusOverride lets "Save & Approve" publish in one step, so a correction
+  // is always saved before approval fires the submitter and subscriber emails.
+  async function submitForm(form: HTMLFormElement, statusOverride?: Event["status"]) {
+    if (!form.reportValidity()) return;
+
     setSaving(true);
     setError("");
     setSuccess(false);
 
-    const form = e.currentTarget;
     const formData = new FormData(form);
+    if (statusOverride) formData.set("status", statusOverride);
 
     const imageFile = formData.get("image") as File | null;
     const hasNewImage = imageFile && imageFile.size > 0;
@@ -285,7 +293,7 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           </div>
         </div>
 
-        <div className="pt-2">
+        <div className="pt-2 flex flex-col sm:flex-row gap-3">
           <button
             type="submit"
             disabled={saving}
@@ -293,7 +301,26 @@ export default function AdminEditPage({ params }: { params: { id: string } }) {
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
+
+          {event.status === "pending" && (
+            <button
+              type="button"
+              disabled={saving}
+              onClick={(e) => submitForm(e.currentTarget.form!, "approved")}
+              className="w-full sm:w-auto bg-green-600 text-white px-8 py-3 rounded font-medium hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-h-[48px]"
+            >
+              {saving ? "Saving..." : "Save & Approve"}
+            </button>
+          )}
         </div>
+
+        {event.status === "pending" && (
+          <p className="text-sm text-gray-500">
+            This event is pending. Approving it emails the submitter their management
+            link, and notifies subscribers in its region — immediately if the event is
+            only days away, otherwise in the next weekly digest.
+          </p>
+        )}
       </form>
     </div>
   );
