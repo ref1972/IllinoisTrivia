@@ -86,10 +86,78 @@ export function regionForCity(city: string): Region {
   return CITY_TO_REGION[city.trim().toLowerCase()] ?? OTHER_REGION;
 }
 
-/** Pulls the city out of "123 Main St, Chicago, IL 60601". */
+const STATE_TOKENS = new Set(['il', 'il.', 'ill', 'ill.', 'illinois']);
+const COUNTRY_TOKENS = new Set(['usa', 'us', 'u.s.', 'u.s.a.', 'united states', 'united states of america']);
+const ZIP = /\b\d{5}(?:-\d{4})?\b/g;
+
+/**
+ * Pulls the city out of an address.
+ *
+ * Submitted addresses are not uniform — some end with ", United States", some
+ * spell out "Illinois", some carry a ZIP in its own segment, and some have no
+ * commas at all. Taking the second-to-last comma segment produced "IL 62704",
+ * "62085" and whole street addresses as city names, which then became public
+ * URLs. This walks in from the end discarding country, state and ZIP fragments,
+ * and returns "" rather than guessing when nothing city-like remains.
+ */
 export function extractCity(address: string): string {
-  const parts = address.split(',');
-  return parts.length >= 2 ? parts[parts.length - 2].trim() : address.trim();
+  if (!address) return '';
+
+  const parts = address.split(',').map(part => part.trim()).filter(Boolean);
+  // A single segment gives no way to tell a street from a city.
+  if (parts.length < 2) return '';
+
+  for (let i = parts.length - 1; i >= 0; i--) {
+    const candidate = parts[i].replace(ZIP, '').replace(/[.\s]+$/, '').trim();
+    if (!candidate) continue;
+
+    const lower = candidate.toLowerCase();
+    if (STATE_TOKENS.has(lower) || COUNTRY_TOKENS.has(lower)) continue;
+    if (/\bcounty\b/i.test(candidate)) continue;
+    if (!/[a-z]/i.test(candidate)) continue;
+
+    // "2142 Old State Road Jacksonville" — street and city run together with no
+    // comma. Everything after the last street-type word is the city.
+    if (/^\d/.test(candidate)) {
+      const salvaged = cityAfterStreet(candidate);
+      if (salvaged) return salvaged;
+      continue;
+    }
+
+    // "North Lakewood Drive" is a street, not a city.
+    if (endsWithStreetWord(candidate)) continue;
+
+    return candidate;
+  }
+
+  return '';
+}
+
+// Deliberately excludes words that are also common in city names — Park,
+// Grove, Heights, Hills — so "Downers Grove" and "Highland Park" survive.
+const STREET_WORDS = new Set([
+  'st', 'street', 'rd', 'road', 'ave', 'avenue', 'dr', 'drive', 'ln', 'lane',
+  'blvd', 'boulevard', 'ct', 'court', 'pkwy', 'parkway', 'hwy', 'highway',
+  'pl', 'place', 'ter', 'terrace', 'cir', 'circle', 'trl', 'trail', 'way',
+]);
+
+function isStreetWord(word: string): boolean {
+  return STREET_WORDS.has(word.toLowerCase().replace(/[.,]/g, ''));
+}
+
+function endsWithStreetWord(value: string): boolean {
+  const words = value.split(/\s+/);
+  return words.length > 0 && isStreetWord(words[words.length - 1]);
+}
+
+function cityAfterStreet(value: string): string {
+  const words = value.split(/\s+/);
+  let lastStreetWord = -1;
+  for (let i = 0; i < words.length; i++) {
+    if (isStreetWord(words[i])) lastStreetWord = i;
+  }
+  if (lastStreetWord === -1) return '';
+  return words.slice(lastStreetWord + 1).join(' ').trim();
 }
 
 /** Region a given event address belongs to. */
