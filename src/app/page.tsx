@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getApprovedEvents } from "@/lib/db";
+import { getCityIndex } from "@/lib/cities";
 import EventList from "@/components/EventList";
 import SubscribeForm from "@/components/SubscribeForm";
 
@@ -15,6 +16,7 @@ export const dynamic = "force-dynamic";
 
 export default function HomePage() {
   const events = getApprovedEvents();
+  const cities = getCityIndex();
 
   return (
     <div className="flex flex-col lg:flex-row gap-8">
@@ -57,6 +59,31 @@ export default function HomePage() {
             Submit an Event
           </Link>
         </div>
+        {cities.length > 0 && (
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h2 className="text-lg font-bold text-[#0B1C3A] mb-3">Browse by City</h2>
+            <ul className="space-y-1.5">
+              {cities.slice(0, 8).map(city => (
+                <li key={city.slug}>
+                  <Link
+                    href={`/trivia/${city.slug}`}
+                    className="text-sm text-gray-700 hover:text-[#C83803] transition-colors"
+                  >
+                    {city.city}
+                    <span className="text-gray-400 ml-1.5">
+                      {city.upcoming + city.quizzes}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            {cities.length > 8 && (
+              <Link href="/trivia" className="inline-block mt-3 text-sm text-[#C83803] font-medium hover:underline">
+                All {cities.length} cities &rarr;
+              </Link>
+            )}
+          </div>
+        )}
         <div className="bg-white rounded-lg border shadow-sm p-6">
           <h2 className="text-lg font-bold text-[#0B1C3A] mb-1">Event Map</h2>
           <p className="text-sm text-gray-600 mb-3">See upcoming events plotted on a map of Illinois.</p>

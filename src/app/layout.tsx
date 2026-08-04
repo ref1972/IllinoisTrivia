@@ -90,6 +90,7 @@ export default function RootLayout({
                 {" "}&mdash; Trivia night fundraisers across the Prairie State
               </p>
               <div className="flex gap-4 items-center">
+                <Link href="/trivia" className="hover:text-white transition-colors">Cities</Link>
                 <Link href="/past-events" className="hover:text-white transition-colors">Past Events</Link>
                 <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
                 <Link href="/submit" className="hover:text-white transition-colors">Submit Event</Link>
