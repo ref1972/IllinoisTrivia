@@ -25,9 +25,19 @@ export default async function AdminSubscribersPage() {
           </Link>
           <h1 className="text-2xl md:text-3xl font-bold text-[#0B1C3A] mt-2">Subscribers</h1>
         </div>
-        <div className="text-right">
-          <p className="text-3xl font-bold text-[#0B1C3A]">{subscribers.length}</p>
-          <p className="text-sm text-gray-500">total subscribers</p>
+        <div className="flex items-center gap-4">
+          {subscribers.length > 0 && (
+            <a
+              href="/api/admin/subscribers/csv"
+              className="bg-[#0B1C3A] text-white px-4 py-2 rounded text-sm font-medium hover:bg-gray-700 transition-colors"
+            >
+              Export CSV
+            </a>
+          )}
+          <div className="text-right">
+            <p className="text-3xl font-bold text-[#0B1C3A]">{subscribers.length}</p>
+            <p className="text-sm text-gray-500">total subscribers</p>
+          </div>
         </div>
       </div>
 

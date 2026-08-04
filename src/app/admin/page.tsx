@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { isAdmin } from "@/lib/auth";
-import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests, getEventsWithoutCoords } from "@/lib/db";
+import { getPendingEvents, getAllEvents, isCaptchaEnabled, getTotalStats, getEventViewCounts, getPendingChangeRequests, getEventsWithoutCoords, getPossibleDuplicates } from "@/lib/db";
+import { plainText } from "@/lib/text";
 import { approveEvent, rejectEvent, toggleCaptcha, approveChangeRequest, rejectChangeRequest } from "./actions";
 import AdminRegeocode from "@/components/AdminRegeocode";
 import AdminCleanupImages from "@/components/AdminCleanupImages";
@@ -130,8 +131,25 @@ export default async function AdminPage() {
                       </p>
                       <p className="text-sm text-gray-600">{event.address}</p>
                       <p className="text-sm text-gray-600">Cost: {event.cost}</p>
-                      <p className="text-sm text-gray-500 mt-2 whitespace-pre-wrap line-clamp-3">{event.description}</p>
+                      <p className="text-sm text-gray-500 mt-2 line-clamp-3">{plainText(event.description)}</p>
                       {event.contact_name && <p className="text-sm text-gray-600 mt-1">Contact: {event.contact_name} — {event.contact_email}</p>}
+                      {getPossibleDuplicates(event).length > 0 && (
+                        <div className="mt-3 bg-amber-50 border border-amber-300 rounded p-2.5">
+                          <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide">Possible duplicate</p>
+                          <ul className="mt-1 space-y-0.5">
+                            {getPossibleDuplicates(event).map((dupe) => (
+                              <li key={dupe.id} className="text-sm text-amber-900">
+                                <Link href={`/admin/edit/${dupe.id}`} className="underline hover:no-underline">
+                                  {dupe.name}
+                                </Link>
+                                <span className="text-amber-700">
+                                  {" "}— {new Date(dupe.date_time).toLocaleDateString()} ({dupe.status})
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2 flex-shrink-0 mt-3 sm:mt-0">

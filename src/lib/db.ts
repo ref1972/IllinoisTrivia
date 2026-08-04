@@ -178,6 +178,23 @@ export function getEventByIdAdmin(id: number): Event | undefined {
   return db.prepare(`SELECT * FROM events WHERE id = ?`).get(id) as Event | undefined;
 }
 
+/**
+ * Other non-rejected events at the same venue within a day of this one. During
+ * fundraising season the same event often arrives twice, from two organisers or
+ * from a resubmission after a typo, and spotting that after approval means the
+ * announcement emails have already gone out.
+ */
+export function getPossibleDuplicates(event: Event): Event[] {
+  return db.prepare(
+    `SELECT * FROM events
+     WHERE id != ?
+       AND status != 'rejected'
+       AND lower(trim(venue)) = lower(trim(?))
+       AND abs(julianday(date_time) - julianday(?)) <= 1
+     ORDER BY date_time ASC`
+  ).all(event.id, event.venue, event.date_time) as Event[];
+}
+
 export function getPendingEvents(): Event[] {
   return db.prepare(
     `SELECT * FROM events WHERE status = 'pending' ORDER BY created_at DESC`

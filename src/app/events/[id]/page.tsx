@@ -242,6 +242,7 @@ export default async function EventPage({ params }: { params: { id: string } }) 
         )}
 
         <EventActions
+          eventId={event.id}
           name={event.name}
           dateTime={event.date_time}
           address={event.address}

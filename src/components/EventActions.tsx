@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 interface EventActionsProps {
+  eventId: number;
   name: string;
   dateTime: string;
   address: string;
@@ -10,57 +11,44 @@ interface EventActionsProps {
   eventUrl: string;
 }
 
-function toICSDate(dateStr: string): string {
-  const d = new Date(dateStr);
-  return d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+// Stored times are Central wall-clock with no offset. Passing them through
+// `new Date()` would reinterpret them in the viewer's timezone, so the local
+// stamp is used verbatim and the timezone is stated explicitly via ctz.
+function toLocalStamp(dateStr: string): string {
+  const m = dateStr.trim().match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+  if (!m) return "";
+  const [, y, mo, d, hh, mm] = m;
+  return `${y}${mo}${d}T${hh}${mm}00`;
+}
+
+function addTwoHours(stamp: string): string {
+  const dt = new Date(Date.UTC(
+    +stamp.slice(0, 4), +stamp.slice(4, 6) - 1, +stamp.slice(6, 8),
+    +stamp.slice(9, 11) + 2, +stamp.slice(11, 13),
+  ));
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${dt.getUTCFullYear()}${p(dt.getUTCMonth() + 1)}${p(dt.getUTCDate())}T${p(dt.getUTCHours())}${p(dt.getUTCMinutes())}00`;
+}
+
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function googleCalendarUrl(name: string, dateTime: string, address: string, description: string): string {
-  const start = new Date(dateTime);
-  const end = new Date(start.getTime() + 2 * 60 * 60 * 1000); // assume 2 hours
-  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const start = toLocalStamp(dateTime);
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: name,
-    dates: `${fmt(start)}/${fmt(end)}`,
+    dates: `${start}/${addTwoHours(start)}`,
+    ctz: "America/Chicago",
     location: address,
-    details: description,
+    details: stripHtml(description),
   });
   return `https://calendar.google.com/calendar/render?${params}`;
 }
 
-function generateICS(name: string, dateTime: string, address: string, description: string, url: string): string {
-  const start = toICSDate(dateTime);
-  const end = toICSDate(new Date(new Date(dateTime).getTime() + 2 * 60 * 60 * 1000).toISOString());
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//IllinoisTrivia.com//EN",
-    "BEGIN:VEVENT",
-    `DTSTART:${start}`,
-    `DTEND:${end}`,
-    `SUMMARY:${name}`,
-    `LOCATION:${address}`,
-    `DESCRIPTION:${description.replace(/\n/g, "\\n")}`,
-    `URL:${url}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-}
-
-export default function EventActions({ name, dateTime, address, description, eventUrl }: EventActionsProps) {
+export default function EventActions({ eventId, name, dateTime, address, description, eventUrl }: EventActionsProps) {
   const [copied, setCopied] = useState(false);
-
-  function downloadICS() {
-    const ics = generateICS(name, dateTime, address, description, eventUrl);
-    const blob = new Blob([ics], { type: "text/calendar" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${name.replace(/[^a-z0-9]/gi, "-").toLowerCase()}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
 
   function copyLink() {
     navigator.clipboard.writeText(eventUrl).then(() => {
@@ -90,8 +78,8 @@ export default function EventActions({ name, dateTime, address, description, eve
             </svg>
             Google Calendar
           </a>
-          <button
-            onClick={downloadICS}
+          <a
+            href={`/events/${eventId}/calendar.ics`}
             className="inline-flex items-center gap-1.5 bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none">
@@ -100,7 +88,7 @@ export default function EventActions({ name, dateTime, address, description, eve
               <path d="M12 14v4M10 16l2 2 2-2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             Apple / Outlook (.ics)
-          </button>
+          </a>
         </div>
       </div>
 
