@@ -111,6 +111,15 @@ db.exec(`
   )
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS geocode_cache (
+    address TEXT PRIMARY KEY,
+    latitude REAL NOT NULL,
+    longitude REAL NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )
+`);
+
 // Initialize defaults
 const captchaSetting = db.prepare(`SELECT value FROM settings WHERE key = 'captcha_enabled'`).get();
 if (!captchaSetting) {
@@ -318,6 +327,41 @@ export function getEventsAwaitingDigest(): Event[] {
 
 export function markEventNotified(id: number): void {
   db.prepare(`UPDATE events SET notified_at = datetime('now') WHERE id = ?`).run(id);
+}
+
+function normalizeAddress(address: string): string {
+  return address.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+/**
+ * Coordinates already known for an address, from a previous geocode or from an
+ * existing event at the same address. Nominatim's usage policy is strict about
+ * volume, and fundraisers reuse the same venues constantly, so most lookups
+ * during a busy approval session should never leave the box.
+ */
+export function lookupKnownCoords(address: string): { lat: number; lng: number } | null {
+  const key = normalizeAddress(address);
+
+  const cached = db.prepare(
+    `SELECT latitude, longitude FROM geocode_cache WHERE address = ?`
+  ).get(key) as { latitude: number; longitude: number } | undefined;
+  if (cached) return { lat: cached.latitude, lng: cached.longitude };
+
+  const existing = db.prepare(
+    `SELECT latitude, longitude FROM events
+     WHERE lower(trim(address)) = ? AND latitude IS NOT NULL AND longitude IS NOT NULL
+     LIMIT 1`
+  ).get(key) as { latitude: number; longitude: number } | undefined;
+  if (existing) return { lat: existing.latitude, lng: existing.longitude };
+
+  return null;
+}
+
+export function cacheCoords(address: string, lat: number, lng: number): void {
+  db.prepare(
+    `INSERT INTO geocode_cache (address, latitude, longitude) VALUES (?, ?, ?)
+     ON CONFLICT(address) DO UPDATE SET latitude = excluded.latitude, longitude = excluded.longitude`
+  ).run(normalizeAddress(address), lat, lng);
 }
 
 export function recordPageView(eventId: number): void {
