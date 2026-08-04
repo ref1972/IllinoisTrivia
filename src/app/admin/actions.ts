@@ -8,10 +8,10 @@ import {
   setSetting, isCaptchaEnabled, deleteEvent,
   duplicateEvent, insertEventAdmin,
   getChangeRequestById, updateChangeRequestStatus,
-  upsertVenue, getEventsWithoutCoords,
+  upsertVenue, getEventsWithoutCoords, markEventNotified,
 } from "@/lib/db";
 import { geocodeAddress } from "@/lib/geocode";
-import { notifySubscribers, sendApprovalEmail, sendChangeRequestOutcome } from "@/lib/email";
+import { isImminent, notifySubscribers, sendApprovalEmail, sendChangeRequestOutcome } from "@/lib/email";
 import { Event } from "@/lib/types";
 
 function revalidateAll(id?: number) {
@@ -32,7 +32,12 @@ export async function approveEvent(id: number) {
       if (coords) updateEvent(id, { latitude: coords.lat, longitude: coords.lng } as Partial<Event>);
     }
     upsertVenue(event.venue, event.address, event.venue_website);
-    notifySubscribers(event).catch(err => console.error("Failed to notify subscribers:", err));
+    // Events happening soon go out straight away; everything else is picked up
+    // by the weekly digest so subscribers get one email instead of one per event.
+    if (isImminent(event.date_time)) {
+      markEventNotified(event.id);
+      notifySubscribers(event).catch(err => console.error("Failed to notify subscribers:", err));
+    }
     if (event.contact_email && (event as Event & { manage_token?: string }).manage_token) {
       sendApprovalEmail({
         name: event.name,

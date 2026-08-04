@@ -118,7 +118,7 @@ if (!captchaSetting) {
 }
 
 // Add columns if missing (existing databases)
-const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT', 'tags TEXT', 'venue_website TEXT', 'questions_by TEXT', 'emcee TEXT', 'theme TEXT'];
+const columnsToAdd = ['image TEXT', 'latitude REAL', 'longitude REAL', 'manage_token TEXT', 'tags TEXT', 'venue_website TEXT', 'questions_by TEXT', 'emcee TEXT', 'theme TEXT', 'notified_at TEXT'];
 for (const col of columnsToAdd) {
   try { db.exec(`ALTER TABLE events ADD COLUMN ${col}`); } catch { /* already exists */ }
 }
@@ -303,6 +303,21 @@ export function getSubscribersForRegion(region: string): Subscriber[] {
   return db.prepare(
     `SELECT * FROM subscribers WHERE region = 'All Illinois' OR region = ?`
   ).all(region) as Subscriber[];
+}
+
+// Events approved but not yet included in any subscriber email. The weekly
+// digest claims these; imminent events are sent immediately on approval and
+// marked at that point so they are not announced twice.
+export function getEventsAwaitingDigest(): Event[] {
+  return db.prepare(
+    `SELECT * FROM events
+     WHERE status = 'approved' AND notified_at IS NULL AND date_time >= datetime('now')
+     ORDER BY date_time ASC`
+  ).all() as Event[];
+}
+
+export function markEventNotified(id: number): void {
+  db.prepare(`UPDATE events SET notified_at = datetime('now') WHERE id = ?`).run(id);
 }
 
 export function recordPageView(eventId: number): void {

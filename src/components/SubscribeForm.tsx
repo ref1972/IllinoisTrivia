@@ -1,24 +1,7 @@
 "use client";
 
 import { useState } from "react";
-
-const IL_REGIONS = [
-  "All Illinois",
-  "Chicago",
-  "Chicago Suburbs (North)",
-  "Chicago Suburbs (South)",
-  "Chicago Suburbs (West)",
-  "Rockford",
-  "Peoria",
-  "Springfield",
-  "Champaign-Urbana",
-  "Bloomington-Normal",
-  "Decatur",
-  "Quad Cities",
-  "Joliet",
-  "Aurora",
-  "Other",
-];
+import { IL_REGIONS } from "@/lib/regions";
 
 export default function SubscribeForm() {
   const [email, setEmail] = useState("");

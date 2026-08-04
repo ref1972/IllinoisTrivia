@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { randomBytes } from "crypto";
 import { addSubscriber, getSubscriberByToken } from "@/lib/db";
+import { isValidRegion } from "@/lib/regions";
 import { sendEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
@@ -11,8 +12,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
     }
 
+    // Reject unknown regions rather than storing a value no event can ever
+    // match, which would leave the subscriber silently receiving nothing.
+    const chosenRegion = isValidRegion(region) ? region : "All Illinois";
+
     const token = randomBytes(32).toString("hex");
-    addSubscriber(email, region || "All Illinois", token);
+    addSubscriber(email, chosenRegion, token);
 
     const unsubscribeUrl = `https://illinoistrivia.com/unsubscribe?token=${token}`;
 
@@ -22,7 +27,7 @@ export async function POST(request: NextRequest) {
       subject: "You're subscribed to IllinoisTrivia.com event alerts",
       html: `
         <h2>You&apos;re subscribed!</h2>
-        <p>You&apos;ll receive email notifications when new trivia night fundraising events are added${region && region !== "All Illinois" ? ` in the <strong>${region}</strong> area` : " across Illinois"}.</p>
+        <p>You&apos;ll receive email notifications when new trivia night fundraising events are added${chosenRegion !== "All Illinois" ? ` in the <strong>${chosenRegion}</strong> area` : " across Illinois"}.</p>
         <p style="margin-top: 24px; color: #999; font-size: 12px;">
           To unsubscribe at any time, <a href="${unsubscribeUrl}">click here</a>.
         </p>

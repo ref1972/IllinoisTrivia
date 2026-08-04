@@ -1,5 +1,7 @@
 import { Resend } from 'resend';
-import { getSubscribersForRegion } from './db';
+import { Event } from './types';
+import { getAllSubscribers, getEventsAwaitingDigest, getSubscribersForRegion, markEventNotified } from './db';
+import { ALL_REGIONS, extractCity, regionForAddress } from './regions';
 
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY);
@@ -7,6 +9,22 @@ function getResend() {
 
 const ADMIN_EMAIL = process.env.ADMIN_NOTIFICATION_EMAIL || 'friedewald@gmail.com';
 const FROM_EMAIL = 'IllinoisTrivia.com <noreply@illinoistrivia.com>';
+const SITE_URL = process.env.NEXTAUTH_URL || 'https://illinoistrivia.com';
+
+// Resend allows a couple of requests per second. Subscriber sends are looped
+// one at a time, so space them out rather than risk 429s as the list grows.
+const SEND_THROTTLE_MS = Number(process.env.EMAIL_THROTTLE_MS ?? 600);
+
+// An event approved this close to its date can't wait for the weekly digest.
+export const IMMEDIATE_NOTICE_DAYS = Number(process.env.IMMEDIATE_NOTICE_DAYS ?? 4);
+
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+export function isImminent(dateTime: string, now: Date = new Date()): boolean {
+  const eventTime = new Date(dateTime).getTime();
+  if (Number.isNaN(eventTime)) return false;
+  return eventTime - now.getTime() <= IMMEDIATE_NOTICE_DAYS * 86400000;
+}
 
 interface EventEmailData {
   name: string;
@@ -24,14 +42,9 @@ export async function sendEmail({ to, subject, html }: { to: string; subject: st
   await getResend().emails.send({ from: FROM_EMAIL, to, subject, html });
 }
 
-function extractCity(address: string): string {
-  const parts = address.split(',');
-  return parts.length >= 2 ? parts[parts.length - 2].trim() : address;
-}
 
 export async function notifySubscribers(event: { id: number; name: string; date_time: string; venue: string; address: string; cost: string }) {
-  const city = extractCity(event.address);
-  const subscribers = getSubscribersForRegion(city);
+  const subscribers = getSubscribersForRegion(regionForAddress(event.address));
   if (subscribers.length === 0) return;
 
   const eventDate = new Date(event.date_time).toLocaleString('en-US', {
@@ -68,7 +81,81 @@ export async function notifySubscribers(event: { id: number; name: string; date_
     } catch (err) {
       console.error(`Failed to notify subscriber ${sub.email}:`, err);
     }
+    await sleep(SEND_THROTTLE_MS);
   }
+}
+
+function digestRowHtml(event: Event): string {
+  const when = new Date(event.date_time).toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+  return `
+    <tr>
+      <td style="padding: 12px 0; border-bottom: 1px solid #eee;">
+        <a href="${SITE_URL}/events/${event.id}" style="color: #C83803; font-weight: bold; font-size: 15px; text-decoration: none;">${event.name}</a>
+        <div style="color: #0B1C3A; font-size: 13px; margin-top: 2px;">${when}</div>
+        <div style="color: #666; font-size: 13px;">${event.venue} &middot; ${extractCity(event.address)}</div>
+        <div style="color: #666; font-size: 13px;">${event.cost}</div>
+      </td>
+    </tr>`;
+}
+
+/**
+ * Sends one email per subscriber covering every event approved since the last
+ * run, filtered to the subscriber's region. Replaces the old behaviour of one
+ * email per approved event, which turned into a flood during fundraising season.
+ */
+export async function sendWeeklyDigest(): Promise<{ recipients: number; events: number }> {
+  const events = getEventsAwaitingDigest();
+  if (events.length === 0) return { recipients: 0, events: 0 };
+
+  const subscribers = getAllSubscribers();
+  let recipients = 0;
+
+  for (const sub of subscribers) {
+    const relevant = sub.region === ALL_REGIONS
+      ? events
+      : events.filter(event => regionForAddress(event.address) === sub.region);
+    if (relevant.length === 0) continue;
+
+    const unsubUrl = `${SITE_URL}/unsubscribe?token=${sub.unsubscribe_token}`;
+    const heading = relevant.length === 1
+      ? 'A new trivia night fundraiser'
+      : `${relevant.length} new trivia night fundraisers`;
+
+    try {
+      await getResend().emails.send({
+        from: FROM_EMAIL,
+        to: sub.email,
+        subject: `${heading} in Illinois`,
+        html: `
+          <h2 style="color: #0B1C3A;">${heading} near you</h2>
+          <table style="border-collapse: collapse; width: 100%; max-width: 520px;">
+            ${relevant.map(digestRowHtml).join('')}
+          </table>
+          <p style="margin-top: 20px;">
+            <a href="${SITE_URL}" style="background-color: #C83803; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">
+              See all upcoming events
+            </a>
+          </p>
+          <p style="margin-top: 24px; color: #999; font-size: 12px;">
+            You're receiving this because you subscribed to IllinoisTrivia.com event alerts.
+            <a href="${unsubUrl}" style="color: #999;">Unsubscribe</a>
+          </p>
+        `,
+      });
+      recipients += 1;
+    } catch (err) {
+      console.error(`Failed to send digest to ${sub.email}:`, err);
+    }
+    await sleep(SEND_THROTTLE_MS);
+  }
+
+  // Mark every event considered, including those no subscriber matched, so the
+  // next run starts clean and late signups don't receive a backlog.
+  for (const event of events) markEventNotified(event.id);
+
+  return { recipients, events: events.length };
 }
 
 export async function sendSubmissionEmails(event: EventEmailData) {

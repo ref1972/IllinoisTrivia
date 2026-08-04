@@ -1,3 +1,35 @@
+# Scheduled jobs
+
+Two cron jobs run on the droplet: the nightly database backup and the weekly
+subscriber digest.
+
+## Weekly digest
+
+`POST /api/cron/digest` emails every subscriber the events approved since the last
+run, filtered to their region, and marks those events so they are never announced
+twice. Events happening within `IMMEDIATE_NOTICE_DAYS` (default 4) are sent at
+approval time instead and skip the digest.
+
+Requires `CRON_SECRET` in `.env.local`. Generate one with `openssl rand -hex 32`.
+The endpoint returns 503 until it is set, so it cannot fire unconfigured.
+
+```
+(crontab -l 2>/dev/null | grep -v api/cron/digest; echo "0 10 * * 3 curl -fsS -X POST -H \"Authorization: Bearer \$CRON_SECRET\" http://localhost:3000/api/cron/digest >> /var/log/illinoistrivia-digest.log 2>&1") | crontab -
+```
+
+Wednesdays at 10:00 UTC (early morning Central), which puts the email in front of
+subscribers a few days before most weekend events. Because cron does not read
+`.env.local`, either inline the secret in the crontab line or export it in the
+crontab's environment.
+
+Trigger a run by hand to check it:
+
+```
+curl -X POST -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/digest
+```
+
+It replies with how many subscribers were emailed and how many events were covered.
+
 # Database backups
 
 `backup-db.js` writes a point-in-time copy of `data/trivia.db` to `/root/backups/trivia-YYYY-MM-DD.db`
