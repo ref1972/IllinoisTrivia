@@ -5,6 +5,16 @@ import { foundFields, readFoundEvent, readSearchCandidate } from "@/lib/found-ev
 
 let searching = false;
 
+const candidateKeys = [...Object.keys(foundFields).filter(key => key !== "date_time"),
+  "event_date", "fundraising_evidence", "trivia_start_evidence"];
+const candidateFormat = { type: "json_schema", name: "fundraiser_candidates", strict: true, schema: {
+  type: "object", additionalProperties: false, required: ["events"],
+  properties: { events: { type: "array", items: {
+    type: "object", additionalProperties: false, required: candidateKeys,
+    properties: Object.fromEntries(candidateKeys.map(key => [key, { type: "string" }])),
+  } } },
+} };
+
 function responseText(result: { output?: { type: string; content?: { type: string; text?: string }[] }[] }) {
   return (result.output ?? []).filter(item => item.type === "message")
     .flatMap(item => item.content ?? []).filter(item => item.type === "output_text")
@@ -62,6 +72,7 @@ export async function POST(request: Request) {
         tool_choice: "required",
         max_tool_calls: 5,
         max_output_tokens: 4000,
+        text: { format: candidateFormat },
         instructions: `Find up to five upcoming in-person Illinois events that meet BOTH conditions:
 trivia or a quiz is the main activity, and an organizer, venue, or registration page explicitly
 identifies that specific event as a fundraiser or states who receives the proceeds. Exclude bingo,
@@ -85,7 +96,6 @@ in the description. Only include contacts publicly listed for this event. Today 
     const raw = responseText(result);
     let candidates = parseEvents(raw);
     if (candidates === null && raw) {
-      const keys = [...Object.keys(foundFields), "event_date", "fundraising_evidence", "trivia_start_evidence"];
       const normalized = await fetch(endpoint, {
         method: "POST",
         headers,
@@ -103,13 +113,7 @@ Use YYYY-MM-DD for event_date and blank strings for unknown details. Copy trivia
 only if text explicitly identifies the trivia start with AM/PM. Never copy doors-open times.
 Return an empty events array if no listing qualifies. Today is ${today}.`,
           input: raw.slice(0, 20000),
-          text: { format: { type: "json_schema", name: "fundraiser_candidates", strict: true, schema: {
-            type: "object", additionalProperties: false, required: ["events"],
-            properties: { events: { type: "array", items: {
-              type: "object", additionalProperties: false, required: keys,
-              properties: Object.fromEntries(keys.map(key => [key, { type: "string" }])),
-            } } },
-          } } },
+          text: { format: candidateFormat },
         }),
       });
       if (!normalized.ok) throw new Error(`Provider normalization HTTP ${normalized.status}`);
