@@ -48,6 +48,9 @@ export default async function AdminPage() {
           >
             Venues
           </Link>
+          <Link href="/admin/find-events" className="border rounded px-4 py-2 text-sm font-medium">
+            Find Fundraisers
+          </Link>
           <Link
             href="/admin/create"
             className="bg-[#C83803] text-white px-4 py-2 rounded text-sm font-medium hover:bg-orange-800 transition-colors"

@@ -245,6 +245,16 @@ export function insertEventAdmin(data: Partial<Event>): number {
   return Number(result.lastInsertRowid);
 }
 
+export function findExistingEvent(name: string, dateTime: string): number | undefined {
+  const row = db.prepare(`
+    SELECT id FROM events
+    WHERE lower(trim(name)) = lower(trim(?)) AND substr(date_time, 1, 16) = ?
+    AND status != 'rejected'
+    LIMIT 1
+  `).get(name, dateTime) as { id: number } | undefined;
+  return row?.id;
+}
+
 export function duplicateEvent(id: number): number {
   const event = getEventByIdAdmin(id);
   if (!event) throw new Error('Event not found');
