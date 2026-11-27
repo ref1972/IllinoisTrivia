@@ -21,6 +21,7 @@ export default function FindEvents() {
   const [saved, setSaved] = useState<Record<number, number>>({});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [unstructured, setUnstructured] = useState(false);
 
   async function run(action: () => Promise<void>) {
     setBusy(true);
@@ -44,6 +45,7 @@ export default function FindEvents() {
         void run(async () => {
           const data = await submit({ action: "search", area });
           setEvents(data.events);
+          setUnstructured(data.unstructured === true);
           setSaved({});
         });
       }}>
@@ -56,7 +58,11 @@ export default function FindEvents() {
       </form>
       {busy && <p role="status">Working…</p>}
       {error && <p role="alert" className="text-red-700 my-3">{error}</p>}
-      {events?.length === 0 && <p>No matching fundraisers found. Try another city or search statewide.</p>}
+      {events?.length === 0 && (
+        <p role="status">{unstructured
+          ? "The search returned an unstructured response, so no candidates could be verified. Try searching again."
+          : "No matching fundraisers found. Try another city or search statewide."}</p>
+      )}
       {events?.map((candidate, index) => (
         <details key={index} className="bg-white border rounded-lg p-4 my-3">
           <summary className="cursor-pointer font-semibold">{candidate.name} {saved[index] && "· Pending"}</summary>
